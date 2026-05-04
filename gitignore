@@ -1,0 +1,35 @@
+# Dépendances
+node_modules/
+
+# Build et fichiers générés
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Variables d'environnement (à ne JAMAIS commiter)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editeurs et OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Tests
+coverage/
+.nyc_output/
+
+# Cache divers
+.cache/
+.parcel-cache/
+.eslintcache
