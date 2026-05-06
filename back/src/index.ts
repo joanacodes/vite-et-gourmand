@@ -12,6 +12,7 @@ import { connecterMongoDB } from "./config/mongodb";
 import { configurationSession } from "./config/session";
 import routesAuth from "./routes/auth";
 import routesMenus from "./routes/menu";
+import routesPlats from "./routes/plat";
 
 // On charge les variables du fichier .env
 dotenv.config();
@@ -61,6 +62,9 @@ app.use("/api/auth", routesAuth);
 
 // Routes des menus : /api/menus/...
 app.use("/api/menus", routesMenus);
+
+// Routes des plats : /api/plats/...
+app.use("/api/plats", routesPlats);
 
 // ============================================================
 // LANCEMENT DU SERVEUR
