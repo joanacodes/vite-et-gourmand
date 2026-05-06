@@ -13,6 +13,7 @@ import { configurationSession } from "./config/session";
 import routesAuth from "./routes/auth";
 import routesMenus from "./routes/menu";
 import routesPlats from "./routes/plat";
+import routesCommandes from "./routes/commande";
 
 // On charge les variables du fichier .env
 dotenv.config();
@@ -51,7 +52,7 @@ app.use(configurationSession);
 // Route de test
 app.get("/", (req: Request, res: Response) => {
   res.json({
-    message: "Bienvenue sur l'API Vite & Gourmand !",
+    message: "TEST 12345",
     version: "1.0.0",
     statut: "operationnel",
   });
@@ -65,6 +66,15 @@ app.use("/api/menus", routesMenus);
 
 // Routes des plats : /api/plats/...
 app.use("/api/plats", routesPlats);
+
+// Routes des commandes : /api/commandes/...
+app.use("/api/commandes", routesCommandes);
+
+app.get("/api/test-commande", (req, res) => {
+  res.json({ message: "Cette route fonctionne" });
+});
+
+console.log("✅ Routes commandes enregistrees dans Express");
 
 // ============================================================
 // LANCEMENT DU SERVEUR
