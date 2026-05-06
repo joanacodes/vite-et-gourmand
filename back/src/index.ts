@@ -11,6 +11,7 @@ import { testerConnexionPostgres } from "./config/postgres";
 import { connecterMongoDB } from "./config/mongodb";
 import { configurationSession } from "./config/session";
 import routesAuth from "./routes/auth";
+import routesMenus from "./routes/menu";
 
 // On charge les variables du fichier .env
 dotenv.config();
@@ -57,6 +58,9 @@ app.get("/", (req: Request, res: Response) => {
 
 // Routes d'authentification : /api/auth/...
 app.use("/api/auth", routesAuth);
+
+// Routes des menus : /api/menus/...
+app.use("/api/menus", routesMenus);
 
 // ============================================================
 // LANCEMENT DU SERVEUR
