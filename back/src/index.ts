@@ -16,6 +16,7 @@ import routesPlats from "./routes/plat";
 import routesCommandes from "./routes/commande";
 import routesAvis from "./routes/avis";
 import routesUtilisateurs from "./routes/utilisateur";
+import routesStats from "./routes/stats";
 
 // On charge les variables du fichier .env
 dotenv.config();
@@ -32,10 +33,10 @@ const PORT = process.env.PORT || 3000;
 
 // CORS : permet au front (autre domaine) de communiquer avec le back
 app.use(
-  cors({
-    origin: process.env.FRONT_URL || "http://localhost:5173",
-    credentials: true, // necessaire pour les sessions
-  }),
+    cors({
+        origin: process.env.FRONT_URL || "http://localhost:5173",
+        credentials: true, // necessaire pour les sessions
+    })
 );
 
 // Permet a Express de lire le JSON envoye par le client
@@ -53,11 +54,11 @@ app.use(configurationSession);
 
 // Route de test
 app.get("/", (req: Request, res: Response) => {
-  res.json({
-    message: "Bienvenue sur l'API Vite & Gourmand !",
-    version: "1.0.0",
-    statut: "operationnel",
-  });
+    res.json({
+        message: "Bienvenue sur l'API Vite & Gourmand !",
+        version: "1.0.0",
+        statut: "operationnel",
+    });
 });
 
 // Routes d'authentification : /api/auth/...
@@ -78,21 +79,24 @@ app.use("/api/avis", routesAvis);
 // Routes des utilisateurs : /api/utilisateurs/...
 app.use("/api/utilisateurs", routesUtilisateurs);
 
+// Routes des statistiques : /api/stats/...
+app.use("/api/stats", routesStats);
+
 // ============================================================
 // LANCEMENT DU SERVEUR
 // ============================================================
 
 async function demarrerServeur() {
-  // On teste la connexion a PostgreSQL
-  await testerConnexionPostgres();
+    // On teste la connexion a PostgreSQL
+    await testerConnexionPostgres();
 
-  // On se connecte a MongoDB (necessaire avant de lancer les sessions)
-  await connecterMongoDB();
+    // On se connecte a MongoDB (necessaire avant de lancer les sessions)
+    await connecterMongoDB();
 
-  // On lance le serveur Express
-  app.listen(PORT, () => {
-    console.log(`🚀 Serveur demarre sur http://localhost:${PORT}`);
-  });
+    // On lance le serveur Express
+    app.listen(PORT, () => {
+        console.log(`🚀 Serveur demarre sur http://localhost:${PORT}`);
+    });
 }
 
 demarrerServeur();
