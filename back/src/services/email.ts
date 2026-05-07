@@ -19,6 +19,7 @@ const transporteur = nodemailer.createTransport({
     }
 });
 
+
 // ============================================================
 // EMAIL DE BIENVENUE
 // Envoye apres l'inscription d'un nouvel utilisateur
@@ -86,6 +87,151 @@ export async function envoyerEmailConfirmationCommande(email: string, prenom: st
         from: '"Vite & Gourmand" <contact@vite-et-gourmand.fr>',
         to: email,
         subject: `Confirmation de votre commande ${numeroCommande}`,
+        html: contenuHTML
+    });
+}
+
+
+// ============================================================
+// EMAIL DE CHANGEMENT DE STATUT D'UNE COMMANDE
+// Envoye quand l'employe/admin change le statut d'une commande
+// ============================================================
+export async function envoyerEmailStatutCommande(
+    email: string, 
+    prenom: string, 
+    numeroCommande: string, 
+    nouveauStatut: string
+) {
+    // Message personnalise selon le nouveau statut
+    let messageStatut = "";
+    let titre = "";
+
+    switch (nouveauStatut) {
+        case "confirmee":
+            titre = "Votre commande est confirmee !";
+            messageStatut = "Notre equipe a valide votre commande. Nous commencerons bientot la preparation.";
+            break;
+        case "en_preparation":
+            titre = "Votre commande est en preparation";
+            messageStatut = "Notre equipe est actuellement en train de preparer votre commande avec soin.";
+            break;
+        case "livree":
+            titre = "Votre commande a ete livree !";
+            messageStatut = "Votre commande a bien ete livree. Nous esperons que vous l'apprecierez ! N'hesitez pas a laisser un avis.";
+            break;
+        default:
+            titre = "Mise a jour de votre commande";
+            messageStatut = `Le statut de votre commande est maintenant : ${nouveauStatut}`;
+    }
+
+    const contenuHTML = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #c0392b;">${titre}</h1>
+            <p>Bonjour ${prenom},</p>
+            <p>${messageStatut}</p>
+            <p><strong>Commande :</strong> ${numeroCommande}</p>
+            <p>Merci de votre confiance,</p>
+            <p><strong>L'equipe Vite & Gourmand</strong></p>
+        </div>
+    `;
+
+    return transporteur.sendMail({
+        from: '"Vite & Gourmand" <contact@vite-et-gourmand.fr>',
+        to: email,
+        subject: `${titre} (${numeroCommande})`,
+        html: contenuHTML
+    });
+}
+
+
+// ============================================================
+// EMAIL D'ANNULATION DE COMMANDE
+// Envoye quand une commande est annulee
+// ============================================================
+export async function envoyerEmailAnnulationCommande(
+    email: string, 
+    prenom: string, 
+    numeroCommande: string, 
+    motifAnnulation: string
+) {
+    const contenuHTML = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #c0392b;">Annulation de votre commande</h1>
+            <p>Bonjour ${prenom},</p>
+            <p>Votre commande <strong>${numeroCommande}</strong> a ete annulee.</p>
+            <p><strong>Motif :</strong> ${motifAnnulation}</p>
+            <p>Si vous avez la moindre question, n'hesitez pas a nous contacter.</p>
+            <p>L'equipe Vite & Gourmand</p>
+        </div>
+    `;
+
+    return transporteur.sendMail({
+        from: '"Vite & Gourmand" <contact@vite-et-gourmand.fr>',
+        to: email,
+        subject: `Annulation de votre commande ${numeroCommande}`,
+        html: contenuHTML
+    });
+}
+
+
+// ============================================================
+// EMAIL DE FORMULAIRE DE CONTACT
+// Envoye a Julie/Jose quand un visiteur remplit le formulaire de contact
+// ============================================================
+export async function envoyerEmailContact(
+    nom: string,
+    email: string,
+    sujet: string,
+    message: string
+) {
+    const contenuHTML = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #c0392b;">Nouveau message de contact</h1>
+            <p><strong>De :</strong> ${nom}</p>
+            <p><strong>Email :</strong> ${email}</p>
+            <p><strong>Sujet :</strong> ${sujet}</p>
+            <hr>
+            <p><strong>Message :</strong></p>
+            <p style="background: #f9f9f9; padding: 15px; border-left: 4px solid #c0392b;">${message}</p>
+            <hr>
+            <p style="color: #666; font-size: 12px;">
+                Vous pouvez repondre directement en repondant a cet email.
+            </p>
+        </div>
+    `;
+
+    return transporteur.sendMail({
+        from: '"Site Vite & Gourmand" <contact@vite-et-gourmand.fr>',
+        to: process.env.MAIL_CONTACT || "contact@vite-et-gourmand.fr",
+        replyTo: email, // Pour que Julie/Jose puissent repondre directement au visiteur
+        subject: `[Contact site] ${sujet}`,
+        html: contenuHTML
+    });
+}
+
+
+// ============================================================
+// EMAIL DE PUBLICATION D'UN AVIS
+// Envoye quand un avis est modere et publie
+// ============================================================
+export async function envoyerEmailAvisPublie(
+    email: string,
+    prenom: string
+) {
+    const contenuHTML = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #c0392b;">Votre avis a ete publie !</h1>
+            <p>Bonjour ${prenom},</p>
+            <p>Votre avis a ete approuve et publie sur notre site.</p>
+            <p>Merci de partager votre experience avec notre communaute !</p>
+            <p>L'equipe Vite & Gourmand</p>
+        </div>
+    `;
+
+    return transporteur.sendMail({
+        from: '"Vite & Gourmand" <contact@vite-et-gourmand.fr>',
+        to: email,
+        subject: "Votre avis a ete publie !",
         html: contenuHTML
     });
 }

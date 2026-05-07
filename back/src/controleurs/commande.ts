@@ -6,12 +6,21 @@
 // - Voir le detail d'une commande
 // - Modifier le statut (employe/admin)
 // - Annuler une commande
+// + Tracking MongoDB pour les statistiques
+// + Emails automatiques de notification
 // ============================================================
 
 import { Request, Response } from "express";
 import pool from "../config/postgres";
-import { envoyerEmailConfirmationCommande } from "../services/email";
-
+import {
+  envoyerEmailConfirmationCommande,
+  envoyerEmailStatutCommande,
+  envoyerEmailAnnulationCommande,
+} from "../services/email";
+import {
+  loggerCreationCommande,
+  loggerAnnulationCommande,
+} from "../services/tracking";
 
 // ============================================================
 // CALCULER LES FRAIS DE LIVRAISON
@@ -21,187 +30,212 @@ import { envoyerEmailConfirmationCommande } from "../services/email";
 // - 25 € si etranger
 // ============================================================
 function calculerFraisLivraison(ville: string, pays: string): number {
-    if (pays.toLowerCase() !== "france") {
-        return 25;
-    }
-    if (ville.toLowerCase() === "bordeaux") {
-        return 10;
-    }
-    return 15;
+  if (pays.toLowerCase() !== "france") {
+    return 25;
+  }
+  if (ville.toLowerCase() === "bordeaux") {
+    return 10;
+  }
+  return 15;
 }
-
 
 // ============================================================
 // VERIFIER SI L'UTILISATEUR EST CLIENT FIDELE
 // Regle metier : 5% de reduction si 3+ commandes confirmees
 // ============================================================
 async function estClientFidele(utilisateurId: number): Promise<boolean> {
-    const resultat = await pool.query(
-        `SELECT COUNT(*) AS nb 
+  const resultat = await pool.query(
+    `SELECT COUNT(*) AS nb 
          FROM commande 
          WHERE utilisateur_id = $1 
          AND statut IN ('confirmee', 'en_preparation', 'livree')`,
-        [utilisateurId]
-    );
-    return parseInt(resultat.rows[0].nb) >= 3;
+    [utilisateurId],
+  );
+  return parseInt(resultat.rows[0].nb) >= 3;
 }
-
 
 // ============================================================
 // GENERER UN NUMERO DE COMMANDE UNIQUE
 // Format : CMD-YYYY-XXXX (XXXX = numero sequentiel sur 4 chiffres)
 // ============================================================
 async function genererNumeroCommande(): Promise<string> {
-    const annee = new Date().getFullYear();
-    
-    // On compte les commandes deja creees cette annee
-    const resultat = await pool.query(
-        `SELECT COUNT(*) AS nb 
+  const annee = new Date().getFullYear();
+
+  // On compte les commandes deja creees cette annee
+  const resultat = await pool.query(
+    `SELECT COUNT(*) AS nb 
          FROM commande 
          WHERE numero_commande LIKE $1`,
-        [`CMD-${annee}-%`]
-    );
-    
-    const nombre = parseInt(resultat.rows[0].nb) + 1;
-    const numeroFormate = String(nombre).padStart(4, "0");
-    
-    return `CMD-${annee}-${numeroFormate}`;
-}
+    [`CMD-${annee}-%`],
+  );
 
+  const nombre = parseInt(resultat.rows[0].nb) + 1;
+  const numeroFormate = String(nombre).padStart(4, "0");
+
+  return `CMD-${annee}-${numeroFormate}`;
+}
 
 // ============================================================
 // CREER UNE COMMANDE
 // POST /api/commandes
 // Reserve aux utilisateurs connectes
-// Body : { menuId, nombrePersonnes, datePrestation, heureLivraison, 
+// Body : { menuId, nombrePersonnes, datePrestation, heureLivraison,
 //          lieuLivraison, villeLivraison, paysLivraison, pretMateriel }
 // ============================================================
 export async function creerCommande(req: Request, res: Response) {
-    const client = await pool.connect();
+  const client = await pool.connect();
 
-    try {
-        await client.query("BEGIN");
+  try {
+    await client.query("BEGIN");
 
-        const utilisateurId = req.session.utilisateur!.id;
-        const {
-            menuId,
-            nombrePersonnes,
-            datePrestation,
-            heureLivraison,
-            lieuLivraison,
-            villeLivraison,
-            paysLivraison,
-            pretMateriel
-        } = req.body;
+    const utilisateurId = req.session.utilisateur!.id;
+    const {
+      menuId,
+      nombrePersonnes,
+      datePrestation,
+      heureLivraison,
+      lieuLivraison,
+      villeLivraison,
+      paysLivraison,
+      pretMateriel,
+    } = req.body;
 
-        // Verification des champs obligatoires
-        if (!menuId || !nombrePersonnes || !datePrestation || !lieuLivraison || !villeLivraison || !paysLivraison) {
-            await client.query("ROLLBACK");
-            return res.status(400).json({
-                erreur: "Tous les champs obligatoires : menuId, nombrePersonnes, datePrestation, lieuLivraison, villeLivraison, paysLivraison"
-            });
-        }
+    // Verification des champs obligatoires
+    if (
+      !menuId ||
+      !nombrePersonnes ||
+      !datePrestation ||
+      !lieuLivraison ||
+      !villeLivraison ||
+      !paysLivraison
+    ) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        erreur:
+          "Tous les champs obligatoires : menuId, nombrePersonnes, datePrestation, lieuLivraison, villeLivraison, paysLivraison",
+      });
+    }
 
-        // Verification que le menu existe et recuperation des infos
-        const resultatMenu = await client.query(
-            `SELECT menu_id, titre, prix_par_personne, nombre_personnes_minimum, quantite_restante
+    // Verification que le menu existe et recuperation des infos
+    const resultatMenu = await client.query(
+      `SELECT menu_id, titre, prix_par_personne, nombre_personnes_minimum, quantite_restante
              FROM menu 
              WHERE menu_id = $1`,
-            [menuId]
-        );
+      [menuId],
+    );
 
-        if (resultatMenu.rows.length === 0) {
-            await client.query("ROLLBACK");
-            return res.status(404).json({ erreur: "Menu introuvable" });
-        }
+    if (resultatMenu.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ erreur: "Menu introuvable" });
+    }
 
-        const menu = resultatMenu.rows[0];
+    const menu = resultatMenu.rows[0];
 
-        // Verification du nombre minimum de personnes
-        if (nombrePersonnes < menu.nombre_personnes_minimum) {
-            await client.query("ROLLBACK");
-            return res.status(400).json({
-                erreur: `Ce menu necessite au minimum ${menu.nombre_personnes_minimum} personnes`
-            });
-        }
+    // Verification du nombre minimum de personnes
+    if (nombrePersonnes < menu.nombre_personnes_minimum) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        erreur: `Ce menu necessite au minimum ${menu.nombre_personnes_minimum} personnes`,
+      });
+    }
 
-        // Verification de la quantite restante
-        if (menu.quantite_restante <= 0) {
-            await client.query("ROLLBACK");
-            return res.status(409).json({
-                erreur: "Ce menu n'est plus disponible (rupture de stock)"
-            });
-        }
+    // Verification de la quantite restante
+    if (menu.quantite_restante <= 0) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        erreur: "Ce menu n'est plus disponible (rupture de stock)",
+      });
+    }
 
-        // Calcul du prix
-        const prixMenu = parseFloat(menu.prix_par_personne) * nombrePersonnes;
-        const prixLivraison = calculerFraisLivraison(villeLivraison, paysLivraison);
-        const fidele = await estClientFidele(utilisateurId);
-        const reduction = fidele ? prixMenu * 0.05 : 0;
-        const prixTotal = (prixMenu - reduction) + prixLivraison;
+    // Calcul du prix
+    const prixMenu = parseFloat(menu.prix_par_personne) * nombrePersonnes;
+    const prixLivraison = calculerFraisLivraison(villeLivraison, paysLivraison);
+    const fidele = await estClientFidele(utilisateurId);
+    const reduction = fidele ? prixMenu * 0.05 : 0;
+    const prixTotal = prixMenu - reduction + prixLivraison;
 
-        // Generation du numero de commande
-        const numeroCommande = await genererNumeroCommande();
+    // Generation du numero de commande
+    const numeroCommande = await genererNumeroCommande();
 
-        // Insertion de la commande
-        await client.query(
-            `INSERT INTO commande 
+    // Insertion de la commande
+    await client.query(
+      `INSERT INTO commande 
              (numero_commande, date_commande, date_prestation, heure_livraison, 
               lieu_livraison, ville_livraison, pays_livraison, nombre_personnes, 
               prix_menu, prix_livraison, statut, pret_materiel,
               utilisateur_id, menu_id)
              VALUES ($1, CURRENT_DATE, $2, $3, $4, $5, $6, $7, $8, $9, 'en_attente', $10, $11, $12)`,
-            [
-                numeroCommande, datePrestation, heureLivraison || null,
-                lieuLivraison, villeLivraison, paysLivraison, nombrePersonnes,
-                prixMenu, prixLivraison, pretMateriel || false,
-                utilisateurId, menuId
-            ]
-        );
+      [
+        numeroCommande,
+        datePrestation,
+        heureLivraison || null,
+        lieuLivraison,
+        villeLivraison,
+        paysLivraison,
+        nombrePersonnes,
+        prixMenu - reduction,
+        prixLivraison,
+        pretMateriel || false,
+        utilisateurId,
+        menuId,
+      ],
+    );
 
-        // Diminution de la quantite restante du menu
-        await client.query(
-            "UPDATE menu SET quantite_restante = quantite_restante - 1 WHERE menu_id = $1",
-            [menuId]
-        );
+    // Diminution de la quantite restante du menu
+    await client.query(
+      "UPDATE menu SET quantite_restante = quantite_restante - 1 WHERE menu_id = $1",
+      [menuId],
+    );
 
-        // Recuperation de l'email de l'utilisateur pour la confirmation
-        const resultatUtilisateur = await client.query(
-            "SELECT email, prenom FROM utilisateur WHERE utilisateur_id = $1",
-            [utilisateurId]
-        );
+    // Recuperation de l'email de l'utilisateur pour la confirmation
+    const resultatUtilisateur = await client.query(
+      "SELECT email, prenom FROM utilisateur WHERE utilisateur_id = $1",
+      [utilisateurId],
+    );
 
-        await client.query("COMMIT");
+    await client.query("COMMIT");
 
-        // Envoi de l'email de confirmation (asynchrone, on n'attend pas)
-        const utilisateur = resultatUtilisateur.rows[0];
-        envoyerEmailConfirmationCommande(utilisateur.email, utilisateur.prenom, numeroCommande)
-            .catch((erreur) => {
-                console.error("Erreur lors de l'envoi de l'email :", erreur);
-            });
+    // Envoi de l'email de confirmation (asynchrone, on n'attend pas)
+    const utilisateur = resultatUtilisateur.rows[0];
+    envoyerEmailConfirmationCommande(
+      utilisateur.email,
+      utilisateur.prenom,
+      numeroCommande,
+    ).catch((erreur) => {
+      console.error("Erreur lors de l'envoi de l'email :", erreur);
+    });
 
-        // Reponse au client
-        res.status(201).json({
-            message: "Commande creee avec succes",
-            commande: {
-                numero: numeroCommande,
-                prixMenu: prixMenu.toFixed(2),
-                prixLivraison: prixLivraison.toFixed(2),
-                reduction: reduction.toFixed(2),
-                prixTotal: prixTotal.toFixed(2),
-                clientFidele: fidele
-            }
-        });
-
-    } catch (erreur) {
-        await client.query("ROLLBACK");
-        console.error("Erreur lors de la creation de la commande :", erreur);
-        res.status(500).json({ erreur: "Erreur serveur" });
-    } finally {
-        client.release();
-    }
+    // ----- TRACKING MONGODB -----
+    // On enregistre la creation de cette commande pour les statistiques
+    
+    loggerCreationCommande(
+      numeroCommande,
+      parseInt(menuId),
+      utilisateurId,
+      prixTotal,
+      parseInt(nombrePersonnes),
+    );
+    
+    // Reponse au client
+    res.status(201).json({
+      message: "Commande creee avec succes",
+      commande: {
+        numero: numeroCommande,
+        prixMenu: prixMenu.toFixed(2),
+        prixLivraison: prixLivraison.toFixed(2),
+        reduction: reduction.toFixed(2),
+        prixTotal: prixTotal.toFixed(2),
+        clientFidele: fidele,
+      },
+    });
+  } catch (erreur) {
+    await client.query("ROLLBACK");
+    console.error("Erreur lors de la creation de la commande :", erreur);
+    res.status(500).json({ erreur: "Erreur serveur" });
+  } finally {
+    client.release();
+  }
 }
-
 
 // ============================================================
 // LISTER LES COMMANDES
@@ -211,11 +245,11 @@ export async function creerCommande(req: Request, res: Response) {
 // Filtres possibles : ?statut=confirmee
 // ============================================================
 export async function listerCommandes(req: Request, res: Response) {
-    try {
-        const utilisateur = req.session.utilisateur!;
-        const { statut } = req.query;
+  try {
+    const utilisateur = req.session.utilisateur!;
+    const { statut } = req.query;
 
-        let requete = `
+    let requete = `
             SELECT c.numero_commande, c.date_commande, c.date_prestation, c.heure_livraison,
                    c.lieu_livraison, c.ville_livraison, c.pays_livraison, c.nombre_personnes,
                    c.prix_menu, c.prix_livraison, c.statut, c.pret_materiel,
@@ -226,43 +260,41 @@ export async function listerCommandes(req: Request, res: Response) {
             JOIN utilisateur u ON c.utilisateur_id = u.utilisateur_id
         `;
 
-        const conditions: string[] = [];
-        const parametres: any[] = [];
-        let indexParam = 1;
+    const conditions: string[] = [];
+    const parametres: any[] = [];
+    let indexParam = 1;
 
-        // Si utilisateur normal : on ne montre que ses commandes
-        if (utilisateur.role === "utilisateur") {
-            conditions.push(`c.utilisateur_id = $${indexParam}`);
-            parametres.push(utilisateur.id);
-            indexParam++;
-        }
-
-        // Filtre par statut
-        if (statut) {
-            conditions.push(`c.statut = $${indexParam}`);
-            parametres.push(statut);
-            indexParam++;
-        }
-
-        if (conditions.length > 0) {
-            requete += ` WHERE ` + conditions.join(" AND ");
-        }
-
-        requete += ` ORDER BY c.date_commande DESC`;
-
-        const resultat = await pool.query(requete, parametres);
-
-        res.json({
-            commandes: resultat.rows,
-            nombre: resultat.rows.length
-        });
-
-    } catch (erreur) {
-        console.error("Erreur lors de la recuperation des commandes :", erreur);
-        res.status(500).json({ erreur: "Erreur serveur" });
+    // Si utilisateur normal : on ne montre que ses commandes
+    if (utilisateur.role === "utilisateur") {
+      conditions.push(`c.utilisateur_id = $${indexParam}`);
+      parametres.push(utilisateur.id);
+      indexParam++;
     }
-}
 
+    // Filtre par statut
+    if (statut) {
+      conditions.push(`c.statut = $${indexParam}`);
+      parametres.push(statut);
+      indexParam++;
+    }
+
+    if (conditions.length > 0) {
+      requete += ` WHERE ` + conditions.join(" AND ");
+    }
+
+    requete += ` ORDER BY c.date_commande DESC`;
+
+    const resultat = await pool.query(requete, parametres);
+
+    res.json({
+      commandes: resultat.rows,
+      nombre: resultat.rows.length,
+    });
+  } catch (erreur) {
+    console.error("Erreur lors de la recuperation des commandes :", erreur);
+    res.status(500).json({ erreur: "Erreur serveur" });
+  }
+}
 
 // ============================================================
 // VOIR LE DETAIL D'UNE COMMANDE
@@ -271,12 +303,12 @@ export async function listerCommandes(req: Request, res: Response) {
 // - Employe/admin : toutes
 // ============================================================
 export async function detailCommande(req: Request, res: Response) {
-    try {
-        const utilisateur = req.session.utilisateur!;
-        const { numero } = req.params;
+  try {
+    const utilisateur = req.session.utilisateur!;
+    const { numero } = req.params;
 
-        const resultat = await pool.query(
-            `SELECT c.*, 
+    const resultat = await pool.query(
+      `SELECT c.*, 
                     m.titre AS menu_titre, m.description AS menu_description, m.prix_par_personne,
                     u.nom AS client_nom, u.prenom AS client_prenom, 
                     u.email AS client_email, u.telephone AS client_telephone
@@ -284,71 +316,94 @@ export async function detailCommande(req: Request, res: Response) {
              JOIN menu m ON c.menu_id = m.menu_id
              JOIN utilisateur u ON c.utilisateur_id = u.utilisateur_id
              WHERE c.numero_commande = $1`,
-            [numero]
-        );
+      [numero],
+    );
 
-        if (resultat.rows.length === 0) {
-            return res.status(404).json({ erreur: "Commande introuvable" });
-        }
-
-        const commande = resultat.rows[0];
-
-        // Securite : un utilisateur normal ne peut voir que ses propres commandes
-        if (utilisateur.role === "utilisateur" && commande.utilisateur_id !== utilisateur.id) {
-            return res.status(403).json({ erreur: "Acces interdit a cette commande" });
-        }
-
-        res.json({ commande });
-
-    } catch (erreur) {
-        console.error("Erreur lors de la recuperation de la commande :", erreur);
-        res.status(500).json({ erreur: "Erreur serveur" });
+    if (resultat.rows.length === 0) {
+      return res.status(404).json({ erreur: "Commande introuvable" });
     }
-}
 
+    const commande = resultat.rows[0];
+
+    // Securite : un utilisateur normal ne peut voir que ses propres commandes
+    if (
+      utilisateur.role === "utilisateur" &&
+      commande.utilisateur_id !== utilisateur.id
+    ) {
+      return res
+        .status(403)
+        .json({ erreur: "Acces interdit a cette commande" });
+    }
+
+    res.json({ commande });
+  } catch (erreur) {
+    console.error("Erreur lors de la recuperation de la commande :", erreur);
+    res.status(500).json({ erreur: "Erreur serveur" });
+  }
+}
 
 // ============================================================
 // MODIFIER LE STATUT D'UNE COMMANDE
 // PUT /api/commandes/:numero/statut
 // Reserve aux employes et admins
 // Body : { statut: "confirmee" | "en_preparation" | "livree" | "annulee" }
+// + Envoi automatique d'un email de notification au client
 // ============================================================
 export async function modifierStatutCommande(req: Request, res: Response) {
-    try {
-        const { numero } = req.params;
-        const { statut } = req.body;
+  try {
+    const { numero } = req.params;
+    const { statut } = req.body;
 
-        // Verification du statut
-        const statutsValides = ["en_attente", "confirmee", "en_preparation", "livree", "annulee"];
-        if (!statut || !statutsValides.includes(statut)) {
-            return res.status(400).json({
-                erreur: `Le statut doit etre l'un des suivants : ${statutsValides.join(", ")}`
-            });
-        }
-
-        // Verification que la commande existe
-        const commandeExiste = await pool.query(
-            "SELECT numero_commande FROM commande WHERE numero_commande = $1",
-            [numero]
-        );
-
-        if (commandeExiste.rows.length === 0) {
-            return res.status(404).json({ erreur: "Commande introuvable" });
-        }
-
-        await pool.query(
-            "UPDATE commande SET statut = $1 WHERE numero_commande = $2",
-            [statut, numero]
-        );
-
-        res.json({ message: `Commande mise a jour : statut = ${statut}` });
-
-    } catch (erreur) {
-        console.error("Erreur lors de la modification du statut :", erreur);
-        res.status(500).json({ erreur: "Erreur serveur" });
+    // Verification du statut
+    const statutsValides = [
+      "en_attente",
+      "confirmee",
+      "en_preparation",
+      "livree",
+      "annulee",
+    ];
+    if (!statut || !statutsValides.includes(statut)) {
+      return res.status(400).json({
+        erreur: `Le statut doit etre l'un des suivants : ${statutsValides.join(", ")}`,
+      });
     }
-}
 
+    // Verification que la commande existe ET recuperation des infos client pour l'email
+    const commandeExiste = await pool.query(
+      `SELECT c.numero_commande, u.email, u.prenom
+             FROM commande c
+             JOIN utilisateur u ON c.utilisateur_id = u.utilisateur_id
+             WHERE c.numero_commande = $1`,
+      [numero],
+    );
+
+    if (commandeExiste.rows.length === 0) {
+      return res.status(404).json({ erreur: "Commande introuvable" });
+    }
+
+    const infoCommande = commandeExiste.rows[0];
+
+    await pool.query(
+      "UPDATE commande SET statut = $1 WHERE numero_commande = $2",
+      [statut, numero],
+    );
+
+    // Envoi de l'email de notification (asynchrone, on n'attend pas)
+    envoyerEmailStatutCommande(
+      infoCommande.email,
+      infoCommande.prenom,
+      numero as string,
+      statut,
+    ).catch((erreur) => {
+      console.error("Erreur lors de l'envoi de l'email statut :", erreur);
+    });
+
+    res.json({ message: `Commande mise a jour : statut = ${statut}` });
+  } catch (erreur) {
+    console.error("Erreur lors de la modification du statut :", erreur);
+    res.status(500).json({ erreur: "Erreur serveur" });
+  }
+}
 
 // ============================================================
 // ANNULER UNE COMMANDE (par l'utilisateur ou employe/admin)
@@ -356,56 +411,79 @@ export async function modifierStatutCommande(req: Request, res: Response) {
 // L'utilisateur ne peut annuler QUE ses propres commandes
 // Et SEULEMENT si statut = en_attente
 // Body : { motifAnnulation, modeContactAnnulation }
+// + Envoi automatique d'un email d'annulation au client
+// + Tracking MongoDB
 // ============================================================
 export async function annulerCommande(req: Request, res: Response) {
-    try {
-        const utilisateur = req.session.utilisateur!;
-        const { numero } = req.params;
-        const { motifAnnulation, modeContactAnnulation } = req.body;
+  try {
+    const utilisateur = req.session.utilisateur!;
+    const { numero } = req.params;
+    const { motifAnnulation, modeContactAnnulation } = req.body;
 
-        const resultat = await pool.query(
-            "SELECT utilisateur_id, statut, menu_id FROM commande WHERE numero_commande = $1",
-            [numero]
-        );
+    const resultat = await pool.query(
+      `SELECT c.utilisateur_id, c.statut, c.menu_id, u.email, u.prenom
+             FROM commande c
+             JOIN utilisateur u ON c.utilisateur_id = u.utilisateur_id
+             WHERE c.numero_commande = $1`,
+      [numero],
+    );
 
-        if (resultat.rows.length === 0) {
-            return res.status(404).json({ erreur: "Commande introuvable" });
-        }
+    if (resultat.rows.length === 0) {
+      return res.status(404).json({ erreur: "Commande introuvable" });
+    }
 
-        const commande = resultat.rows[0];
+    const commande = resultat.rows[0];
 
-        // Verification que c'est bien sa commande (sauf pour employe/admin)
-        if (utilisateur.role === "utilisateur" && commande.utilisateur_id !== utilisateur.id) {
-            return res.status(403).json({ erreur: "Vous ne pouvez annuler que vos propres commandes" });
-        }
+    // Verification que c'est bien sa commande (sauf pour employe/admin)
+    if (
+      utilisateur.role === "utilisateur" &&
+      commande.utilisateur_id !== utilisateur.id
+    ) {
+      return res
+        .status(403)
+        .json({ erreur: "Vous ne pouvez annuler que vos propres commandes" });
+    }
 
-        // Verification que la commande peut etre annulee
-        if (commande.statut !== "en_attente") {
-            return res.status(409).json({
-                erreur: "Cette commande ne peut plus etre annulee (deja confirmee ou avancee)"
-            });
-        }
+    // Verification que la commande peut etre annulee
+    if (commande.statut !== "en_attente") {
+      return res.status(409).json({
+        erreur:
+          "Cette commande ne peut plus etre annulee (deja confirmee ou avancee)",
+      });
+    }
 
-        // Annulation
-        await pool.query(
-            `UPDATE commande 
+    // Annulation
+    await pool.query(
+      `UPDATE commande 
              SET statut = 'annulee', 
                  motif_annulation = $1, 
                  mode_contact_annulation = $2 
              WHERE numero_commande = $3`,
-            [motifAnnulation || null, modeContactAnnulation || null, numero]
-        );
+      [motifAnnulation || null, modeContactAnnulation || null, numero],
+    );
 
-        // Restauration du stock du menu
-        await pool.query(
-            "UPDATE menu SET quantite_restante = quantite_restante + 1 WHERE menu_id = $1",
-            [commande.menu_id]
-        );
+    // Restauration du stock du menu
+    await pool.query(
+      "UPDATE menu SET quantite_restante = quantite_restante + 1 WHERE menu_id = $1",
+      [commande.menu_id],
+    );
 
-        res.json({ message: "Commande annulee avec succes" });
+    // Envoi de l'email d'annulation (asynchrone)
+    envoyerEmailAnnulationCommande(
+      commande.email,
+      commande.prenom,
+      numero as string,
+      motifAnnulation || "Aucun motif precise",
+    ).catch((erreur) => {
+      console.error("Erreur lors de l'envoi de l'email d'annulation :", erreur);
+    });
 
-    } catch (erreur) {
-        console.error("Erreur lors de l'annulation de la commande :", erreur);
-        res.status(500).json({ erreur: "Erreur serveur" });
-    }
+    // ----- TRACKING MONGODB -----
+    loggerAnnulationCommande(numero as string, commande.utilisateur_id);
+
+    res.json({ message: "Commande annulee avec succes" });
+  } catch (erreur) {
+    console.error("Erreur lors de l'annulation de la commande :", erreur);
+    res.status(500).json({ erreur: "Erreur serveur" });
+  }
 }

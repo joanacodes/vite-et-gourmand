@@ -17,6 +17,7 @@ import routesCommandes from "./routes/commande";
 import routesAvis from "./routes/avis";
 import routesUtilisateurs from "./routes/utilisateur";
 import routesStats from "./routes/stats";
+import routesContact from "./routes/contact";
 
 // On charge les variables du fichier .env
 dotenv.config();
@@ -81,6 +82,9 @@ app.use("/api/utilisateurs", routesUtilisateurs);
 
 // Routes des statistiques : /api/stats/...
 app.use("/api/stats", routesStats);
+
+// Route du formulaire de contact : /api/contact
+app.use("/api/contact", routesContact);
 
 // ============================================================
 // LANCEMENT DU SERVEUR
