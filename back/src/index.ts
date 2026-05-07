@@ -1,15 +1,23 @@
 // ============================================================
 // SERVEUR PRINCIPAL - VITE & GOURMAND
 // Ce fichier est le point d'entree de l'application back-end.
-// Il configure Express, les middlewares, les routes et lance le serveur.
+// Il configure Express, les middlewares (dont securite),
+// les routes et lance le serveur.
 // ============================================================
 
 import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import helmet from "helmet";
 import { testerConnexionPostgres } from "./config/postgres";
 import { connecterMongoDB } from "./config/mongodb";
 import { configurationSession } from "./config/session";
+import {
+  limiteurConnexion,
+  limiteurMotDePasseOublie,
+  limiteurContact,
+  limiteurGlobal,
+} from "./config/securite";
 import routesAuth from "./routes/auth";
 import routesMenus from "./routes/menu";
 import routesPlats from "./routes/plat";
@@ -29,22 +37,34 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
+// SECURITE - MIDDLEWARES PRIORITAIRES
+// ============================================================
+
+// Helmet : ajoute des headers HTTP de securite
+// Protege contre XSS, clickjacking, MIME sniffing, etc.
+app.use(helmet());
+
+// Desactive l'header "X-Powered-By" qui revele Express
+app.disable("x-powered-by");
+
+// Limiteur global anti-DOS
+app.use(limiteurGlobal);
+
+// ============================================================
 // MIDDLEWARES GLOBAUX
 // ============================================================
 
 // CORS : permet au front (autre domaine) de communiquer avec le back
 app.use(
-    cors({
-        origin: process.env.FRONT_URL || "http://localhost:5173",
-        credentials: true, // necessaire pour les sessions
-    })
+  cors({
+    origin: process.env.FRONT_URL || "http://localhost:5173",
+    credentials: true,
+  }),
 );
 
-// Permet a Express de lire le JSON envoye par le client
-app.use(express.json());
-
-// Permet a Express de lire les donnees de formulaires URL-encoded
-app.use(express.urlencoded({ extended: true }));
+// Limite la taille du body a 10kb (anti DOS)
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
 // Configuration des sessions (doit etre AVANT les routes)
 app.use(configurationSession);
@@ -55,14 +75,17 @@ app.use(configurationSession);
 
 // Route de test
 app.get("/", (req: Request, res: Response) => {
-    res.json({
-        message: "Bienvenue sur l'API Vite & Gourmand !",
-        version: "1.0.0",
-        statut: "operationnel",
-    });
+  res.json({
+    message: "Bienvenue sur l'API Vite & Gourmand !",
+    version: "1.0.0",
+    statut: "operationnel",
+  });
 });
 
 // Routes d'authentification : /api/auth/...
+// Application de limiteurs specifiques sur les routes sensibles
+app.use("/api/auth/connexion", limiteurConnexion);
+app.use("/api/auth/mot-de-passe-oublie", limiteurMotDePasseOublie);
 app.use("/api/auth", routesAuth);
 
 // Routes des menus : /api/menus/...
@@ -83,24 +106,24 @@ app.use("/api/utilisateurs", routesUtilisateurs);
 // Routes des statistiques : /api/stats/...
 app.use("/api/stats", routesStats);
 
-// Route du formulaire de contact : /api/contact
-app.use("/api/contact", routesContact);
+// Route du formulaire de contact : /api/contact (avec limiteur)
+app.use("/api/contact", limiteurContact, routesContact);
 
 // ============================================================
 // LANCEMENT DU SERVEUR
 // ============================================================
 
 async function demarrerServeur() {
-    // On teste la connexion a PostgreSQL
-    await testerConnexionPostgres();
+  // On teste la connexion a PostgreSQL
+  await testerConnexionPostgres();
 
-    // On se connecte a MongoDB (necessaire avant de lancer les sessions)
-    await connecterMongoDB();
+  // On se connecte a MongoDB (necessaire avant de lancer les sessions)
+  await connecterMongoDB();
 
-    // On lance le serveur Express
-    app.listen(PORT, () => {
-        console.log(`🚀 Serveur demarre sur http://localhost:${PORT}`);
-    });
+  // On lance le serveur Express
+  app.listen(PORT, () => {
+    console.log(`🚀 Serveur demarre sur http://localhost:${PORT}`);
+  });
 }
 
 demarrerServeur();
