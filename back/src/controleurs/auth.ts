@@ -5,12 +5,16 @@
 // - La connexion d'un utilisateur existant
 // - La deconnexion
 // - Recuperer les infos de l'utilisateur connecte
+// - Demander une reinitialisation de mot de passe
+// - Reinitialiser son mot de passe avec un token
 // ============================================================
 
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import pool from "../config/postgres";
-import { envoyerEmailBienvenue } from "../services/email";
+import { envoyerEmailBienvenue, envoyerEmailReinitialisation } from "../services/email";
+import TokenReinitialisation from "../modeles/token";
 
 // ============================================================
 // INSCRIPTION
@@ -218,6 +222,130 @@ export async function moi(req: Request, res: Response) {
 
     } catch (erreur) {
         console.error("Erreur lors de la recuperation du profil :", erreur);
+        res.status(500).json({ erreur: "Erreur serveur" });
+    }
+}
+
+
+// ============================================================
+// MOT DE PASSE OUBLIE - DEMANDE
+// POST /api/auth/mot-de-passe-oublie
+// Body : { email }
+// 
+// Cette route :
+// 1. Verifie si l'email existe (mais ne le dit pas pour des raisons de securite)
+// 2. Genere un token aleatoire et le stocke dans MongoDB (expire dans 1h)
+// 3. Envoie un email contenant le lien de reinitialisation
+// 
+// IMPORTANT : pour la securite, on retourne TOUJOURS un 200 OK,
+// meme si l'email n'existe pas (pour ne pas reveler si un compte existe)
+// ============================================================
+export async function motDePasseOublie(req: Request, res: Response) {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ erreur: "L'email est obligatoire" });
+        }
+
+        // Recherche de l'utilisateur
+        const resultat = await pool.query(
+            "SELECT utilisateur_id, prenom FROM utilisateur WHERE email = $1 AND actif = true",
+            [email]
+        );
+
+        // Si l'utilisateur existe, on traite la demande
+        if (resultat.rows.length > 0) {
+            const utilisateur = resultat.rows[0];
+
+            // Generation d'un token aleatoire securise (32 octets = 64 caracteres hex)
+            const token = crypto.randomBytes(32).toString("hex");
+
+            // Stockage en MongoDB (avec TTL automatique de 1h)
+            await TokenReinitialisation.create({
+                token,
+                utilisateurId: utilisateur.utilisateur_id
+            });
+
+            // Construction du lien de reinitialisation
+            const urlFront = process.env.FRONT_URL || "http://localhost:5173";
+            const lienReinitialisation = `${urlFront}/reinitialiser-mot-de-passe?token=${token}`;
+
+            // Envoi de l'email (asynchrone, on n'attend pas)
+            envoyerEmailReinitialisation(email, lienReinitialisation).catch((erreur) => {
+                console.error("Erreur lors de l'envoi de l'email de reinitialisation :", erreur);
+            });
+        }
+
+        // Reponse SECURISEE : on retourne TOUJOURS le meme message
+        // (pour ne pas reveler si l'email existe ou non dans la BDD)
+        res.json({
+            message: "Si cet email existe dans notre systeme, un lien de reinitialisation a ete envoye"
+        });
+
+    } catch (erreur) {
+        console.error("Erreur lors de la demande de reinitialisation :", erreur);
+        res.status(500).json({ erreur: "Erreur serveur" });
+    }
+}
+
+
+// ============================================================
+// MOT DE PASSE OUBLIE - REINITIALISATION
+// POST /api/auth/reinitialiser-mot-de-passe
+// Body : { token, nouveauMotDePasse }
+// 
+// Cette route :
+// 1. Verifie que le token existe et n'est pas expire
+// 2. Valide le format du nouveau mot de passe
+// 3. Hash le nouveau mot de passe et le sauvegarde en BDD
+// 4. Supprime le token (usage unique)
+// ============================================================
+export async function reinitialiserMotDePasse(req: Request, res: Response) {
+    try {
+        const { token, nouveauMotDePasse } = req.body;
+
+        if (!token || !nouveauMotDePasse) {
+            return res.status(400).json({
+                erreur: "Le token et le nouveau mot de passe sont obligatoires"
+            });
+        }
+
+        // Verification du format du nouveau mot de passe
+        const regexMotDePasse = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{10,}$/;
+        if (!regexMotDePasse.test(nouveauMotDePasse)) {
+            return res.status(400).json({
+                erreur: "Le mot de passe doit contenir au moins 10 caracteres, une majuscule, une minuscule, un chiffre et un caractere special"
+            });
+        }
+
+        // Recherche du token en MongoDB
+        const tokenDoc = await TokenReinitialisation.findOne({ token });
+
+        if (!tokenDoc) {
+            return res.status(404).json({
+                erreur: "Token invalide ou expire. Veuillez refaire une demande de reinitialisation."
+            });
+        }
+
+        // Hashage du nouveau mot de passe
+        const motDePasseHashe = await bcrypt.hash(nouveauMotDePasse, 10);
+
+        // Mise a jour du mot de passe en BDD
+        await pool.query(
+            "UPDATE utilisateur SET mot_de_passe = $1 WHERE utilisateur_id = $2",
+            [motDePasseHashe, tokenDoc.utilisateurId]
+        );
+
+        // Suppression du token (usage unique)
+        await TokenReinitialisation.deleteOne({ token });
+
+        res.json({
+            message: "Votre mot de passe a ete reinitialise avec succes. Vous pouvez maintenant vous connecter."
+        });
+
+    } catch (erreur) {
+        console.error("Erreur lors de la reinitialisation du mot de passe :", erreur);
         res.status(500).json({ erreur: "Erreur serveur" });
     }
 }

@@ -4,7 +4,14 @@
 // ============================================================
 
 import { Router } from "express";
-import { inscription, connexion, deconnexion, moi } from "../controleurs/auth";
+import { 
+    inscription, 
+    connexion, 
+    deconnexion, 
+    moi,
+    motDePasseOublie,
+    reinitialiserMotDePasse
+} from "../controleurs/auth";
 
 const routeur = Router();
 
@@ -19,5 +26,11 @@ routeur.post("/deconnexion", deconnexion);
 
 // GET /api/auth/moi : recuperer les infos de l'utilisateur connecte
 routeur.get("/moi", moi);
+
+// POST /api/auth/mot-de-passe-oublie : demander une reinitialisation
+routeur.post("/mot-de-passe-oublie", motDePasseOublie);
+
+// POST /api/auth/reinitialiser-mot-de-passe : changer son mot de passe avec un token
+routeur.post("/reinitialiser-mot-de-passe", reinitialiserMotDePasse);
 
 export default routeur;
