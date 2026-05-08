@@ -5,11 +5,12 @@
 
 import { Router } from "express";
 import {
-  creerCommande,
-  listerCommandes,
-  detailCommande,
-  modifierStatutCommande,
-  annulerCommande,
+    creerCommande,
+    listerCommandes,
+    detailCommande,
+    modifierStatutCommande,
+    annulerCommande,
+    obtenirHistoriqueCommande,
 } from "../controleurs/commande";
 import { estConnecte, estEmploye } from "../middlewares/auth";
 
@@ -26,6 +27,9 @@ routeur.get("/", listerCommandes);
 // Voir le detail d'une commande
 routeur.get("/:numero", detailCommande);
 
+// Voir l'historique des statuts d'une commande
+routeur.get("/:numero/historique", obtenirHistoriqueCommande);
+
 // Creer une commande
 routeur.post("/", creerCommande);
 
@@ -34,6 +38,7 @@ routeur.put("/:numero/annuler", annulerCommande);
 
 // Modifier le statut (employe/admin uniquement)
 routeur.put("/:numero/statut", estEmploye, modifierStatutCommande);
+
 console.log("📋 Nombre de routes enregistrees :", routeur.stack.length);
 
 export default routeur;
