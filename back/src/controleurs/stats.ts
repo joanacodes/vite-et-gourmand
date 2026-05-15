@@ -25,12 +25,12 @@ export async function dashboard(req: Request, res: Response) {
       "SELECT COUNT(*) AS total FROM commande",
     );
 
-    // CA total (commandes confirmees, en preparation, livrees)
+    // CA total (commandes acceptees, en preparation, en livraison, livrees, terminees)
     // CALCUL : prix_menu + prix_livraison
     const caTotal = await pool.query(
       `SELECT COALESCE(SUM(prix_menu + prix_livraison), 0) AS ca 
              FROM commande 
-             WHERE statut IN ('confirmee', 'en_preparation', 'livree')`,
+             WHERE statut IN ('accepte', 'en_preparation', 'en_cours_livraison', 'livre', 'attente_retour_materiel', 'terminee')`,
     );
 
     // Nombre d'utilisateurs actifs
@@ -38,14 +38,14 @@ export async function dashboard(req: Request, res: Response) {
       "SELECT COUNT(*) AS total FROM utilisateur WHERE actif = true",
     );
 
-    // Nombre d'avis publies
+    // Nombre d'avis valides (publies sur le site)
     const totalAvis = await pool.query(
-      "SELECT COUNT(*) AS total FROM avis WHERE statut = 'publie'",
+      "SELECT COUNT(*) AS total FROM avis WHERE statut = 'valide'",
     );
 
     // Note moyenne globale
     const noteMoyenne = await pool.query(
-      "SELECT ROUND(AVG(note)::numeric, 2) AS moyenne FROM avis WHERE statut = 'publie'",
+      "SELECT ROUND(AVG(note)::numeric, 2) AS moyenne FROM avis WHERE statut = 'valide'",
     );
 
     // ---- MongoDB : analytics ----
@@ -66,7 +66,7 @@ export async function dashboard(req: Request, res: Response) {
         actifs: parseInt(totalUtilisateurs.rows[0].total),
       },
       avis: {
-        publies: parseInt(totalAvis.rows[0].total),
+        valides: parseInt(totalAvis.rows[0].total),
         noteMoyenne: noteMoyenne.rows[0].moyenne
           ? parseFloat(noteMoyenne.rows[0].moyenne)
           : 0,
@@ -139,7 +139,7 @@ export async function chiffreAffairesParMois(req: Request, res: Response) {
                 COUNT(*) AS nombre_commandes,
                 COALESCE(SUM(prix_menu + prix_livraison), 0) AS ca
              FROM commande
-             WHERE statut IN ('confirmee', 'en_preparation', 'livree')
+             WHERE statut IN ('accepte', 'en_preparation', 'en_cours_livraison', 'livre', 'attente_retour_materiel', 'terminee')
                 AND date_commande >= NOW() - INTERVAL '12 months'
              GROUP BY mois
              ORDER BY mois DESC`,
@@ -161,7 +161,7 @@ export async function chiffreAffairesParMois(req: Request, res: Response) {
 // ============================================================
 // CLIENTS FIDELES (PostgreSQL)
 // GET /api/stats/clients-fideles
-// Top 10 des clients par nombre de commandes confirmees
+// Top 10 des clients par nombre de commandes honorees
 // ============================================================
 export async function clientsFideles(req: Request, res: Response) {
   try {
@@ -172,7 +172,7 @@ export async function clientsFideles(req: Request, res: Response) {
                 COALESCE(SUM(c.prix_menu + c.prix_livraison), 0) AS total_depense
              FROM utilisateur u
              JOIN commande c ON u.utilisateur_id = c.utilisateur_id
-             WHERE c.statut IN ('confirmee', 'en_preparation', 'livree')
+             WHERE c.statut IN ('accepte', 'en_preparation', 'en_cours_livraison', 'livre', 'attente_retour_materiel', 'terminee')
              GROUP BY u.utilisateur_id, u.nom, u.prenom, u.email
              ORDER BY nombre_commandes DESC, total_depense DESC
              LIMIT 10`,

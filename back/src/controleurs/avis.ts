@@ -1,7 +1,7 @@
 // ============================================================
 // CONTROLEUR DES AVIS
 // Contient toute la logique pour :
-// - Lister les avis publies (publics)
+// - Lister les avis valides (publics)
 // - Voir les avis d'un menu specifique
 // - Creer un avis (utilisateur connecte, lie a une commande)
 // - Modifier son avis
@@ -16,7 +16,7 @@ import pool from "../config/postgres";
 // ============================================================
 // LISTER TOUS LES AVIS PUBLIES (PUBLIC)
 // GET /api/avis
-// Retourne tous les avis dont le statut est "publie"
+// Retourne tous les avis dont le statut est "valide"
 // ============================================================
 export async function listerAvis(req: Request, res: Response) {
     try {
@@ -30,7 +30,7 @@ export async function listerAvis(req: Request, res: Response) {
              JOIN publie p ON a.avis_id = p.avis_id
              JOIN commande c ON p.numero_commande = c.numero_commande
              JOIN menu m ON c.menu_id = m.menu_id
-             WHERE a.statut = 'publie'
+             WHERE a.statut = 'valide'
              ORDER BY a.date_creation DESC`
         );
 
@@ -49,7 +49,7 @@ export async function listerAvis(req: Request, res: Response) {
 // ============================================================
 // LISTER LES AVIS D'UN MENU SPECIFIQUE (PUBLIC)
 // GET /api/avis/menu/:id
-// Retourne les avis publies pour un menu donne + la note moyenne
+// Retourne les avis valides pour un menu donne + la note moyenne
 // ============================================================
 export async function avisParMenu(req: Request, res: Response) {
     try {
@@ -63,7 +63,7 @@ export async function avisParMenu(req: Request, res: Response) {
              JOIN utilisateur u ON a.utilisateur_id = u.utilisateur_id
              JOIN publie p ON a.avis_id = p.avis_id
              JOIN commande c ON p.numero_commande = c.numero_commande
-             WHERE c.menu_id = $1 AND a.statut = 'publie'
+             WHERE c.menu_id = $1 AND a.statut = 'valide'
              ORDER BY a.date_creation DESC`,
             [id]
         );
@@ -74,7 +74,7 @@ export async function avisParMenu(req: Request, res: Response) {
              FROM avis a
              JOIN publie p ON a.avis_id = p.avis_id
              JOIN commande c ON p.numero_commande = c.numero_commande
-             WHERE c.menu_id = $1 AND a.statut = 'publie'`,
+             WHERE c.menu_id = $1 AND a.statut = 'valide'`,
             [id]
         );
 
@@ -145,10 +145,10 @@ export async function creerAvis(req: Request, res: Response) {
         }
 
         // Verification que la commande a ete livree (sinon pas d'avis)
-        if (commande.statut !== "livree") {
+        if (commande.statut !== "livre" && commande.statut !== "terminee") {
             await client.query("ROLLBACK");
             return res.status(409).json({
-                erreur: "Vous ne pouvez laisser un avis que sur une commande livree"
+                erreur: "Vous ne pouvez laisser un avis que sur une commande livree ou terminee"
             });
         }
 
@@ -290,14 +290,14 @@ export async function supprimerAvis(req: Request, res: Response) {
 // ============================================================
 // MODERER UN AVIS (employe/admin)
 // PUT /api/avis/:id/moderer
-// Body : { statut: "publie" | "refuse" }
+// Body : { statut: "valide" | "refuse" }
 // ============================================================
 export async function modererAvis(req: Request, res: Response) {
     try {
         const { id } = req.params;
         const { statut } = req.body;
 
-        const statutsValides = ["publie", "refuse", "en_attente"];
+        const statutsValides = ["valide", "refuse", "en_attente"];
         if (!statut || !statutsValides.includes(statut)) {
             return res.status(400).json({
                 erreur: `Le statut doit etre l'un des suivants : ${statutsValides.join(", ")}`

@@ -91,7 +91,7 @@ async function genererNumeroCommande(): Promise<string> {
 // CREER UNE COMMANDE
 // POST /api/commandes
 // Body : { menuId, nombrePersonnes, datePrestation, heureLivraison,
-//          lieuLivraison, villeLivraison, paysLivraison, distanceKm, pretMateriel }
+//          lieuLivraison, distanceKm, pretMateriel }
 // ============================================================
 export async function creerCommande(req: Request, res: Response) {
   const client = await pool.connect();
@@ -106,8 +106,6 @@ export async function creerCommande(req: Request, res: Response) {
       datePrestation,
       heureLivraison,
       lieuLivraison,
-      villeLivraison,
-      paysLivraison,
       distanceKm,
       pretMateriel,
     } = req.body;
@@ -117,14 +115,12 @@ export async function creerCommande(req: Request, res: Response) {
       !menuId ||
       !nombrePersonnes ||
       !datePrestation ||
-      !lieuLivraison ||
-      !villeLivraison ||
-      !paysLivraison
+      !lieuLivraison
     ) {
       await client.query("ROLLBACK");
       return res.status(400).json({
         erreur:
-          "Tous les champs obligatoires : menuId, nombrePersonnes, datePrestation, lieuLivraison, villeLivraison, paysLivraison",
+          "Tous les champs obligatoires : menuId, nombrePersonnes, datePrestation, lieuLivraison",
       });
     }
 
@@ -182,17 +178,15 @@ export async function creerCommande(req: Request, res: Response) {
     await client.query(
       `INSERT INTO commande
              (numero_commande, date_commande, date_prestation, heure_livraison,
-              lieu_livraison, ville_livraison, pays_livraison, distance_km, nombre_personnes,
+              lieu_livraison, distance_km, nombre_personnes,
               prix_menu, prix_livraison, statut, pret_materiel,
               utilisateur_id, menu_id)
-             VALUES ($1, CURRENT_DATE, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'en_attente', $11, $12, $13)`,
+             VALUES ($1, CURRENT_DATE, $2, $3, $4, $5, $6, $7, $8, 'en_attente', $9, $10, $11)`,
       [
         numeroCommande,
         datePrestation,
         heureLivraison || null,
         lieuLivraison,
-        villeLivraison,
-        paysLivraison,
         distance,
         nombrePersonnes,
         prixMenu,
@@ -278,7 +272,7 @@ export async function listerCommandes(req: Request, res: Response) {
 
     let requete = `
             SELECT c.numero_commande, c.date_commande, c.date_prestation, c.heure_livraison,
-                   c.lieu_livraison, c.ville_livraison, c.pays_livraison, c.distance_km,
+                   c.lieu_livraison, c.distance_km,
                    c.nombre_personnes, c.prix_menu, c.prix_livraison, c.statut, c.pret_materiel,
                    m.titre AS menu_titre,
                    u.utilisateur_id, u.nom AS client_nom, u.prenom AS client_prenom, u.email AS client_email

@@ -70,14 +70,15 @@ export async function envoyerEmailReinitialisation(email: string, lienReinitiali
 
 // ============================================================
 // EMAIL DE CONFIRMATION DE COMMANDE
+// Envoye quand le client passe une commande (statut initial : en_attente)
 // ============================================================
 export async function envoyerEmailConfirmationCommande(email: string, prenom: string, numeroCommande: string) {
     const contenuHTML = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #c0392b;">Commande confirmee !</h1>
+            <h1 style="color: #c0392b;">Commande bien recue !</h1>
             <p>Bonjour ${prenom},</p>
             <p>Nous avons bien recu votre commande <strong>${numeroCommande}</strong>.</p>
-            <p>Notre equipe va l'examiner et vous contacter rapidement.</p>
+            <p>Notre equipe va l'examiner et vous contacter rapidement pour la valider.</p>
             <p>Merci de votre confiance,</p>
             <p><strong>L'equipe Vite & Gourmand</strong></p>
         </div>
@@ -86,7 +87,7 @@ export async function envoyerEmailConfirmationCommande(email: string, prenom: st
     return transporteur.sendMail({
         from: '"Vite & Gourmand" <contact@vite-et-gourmand.fr>',
         to: email,
-        subject: `Confirmation de votre commande ${numeroCommande}`,
+        subject: `Confirmation de reception : commande ${numeroCommande}`,
         html: contenuHTML
     });
 }
@@ -107,17 +108,33 @@ export async function envoyerEmailStatutCommande(
     let titre = "";
 
     switch (nouveauStatut) {
-        case "confirmee":
-            titre = "Votre commande est confirmee !";
+        case "accepte":
+            titre = "Votre commande a ete acceptee !";
             messageStatut = "Notre equipe a valide votre commande. Nous commencerons bientot la preparation.";
             break;
         case "en_preparation":
             titre = "Votre commande est en preparation";
             messageStatut = "Notre equipe est actuellement en train de preparer votre commande avec soin.";
             break;
-        case "livree":
+        case "en_cours_livraison":
+            titre = "Votre commande est en cours de livraison";
+            messageStatut = "Votre commande est en route ! Notre livreur sera bientot chez vous.";
+            break;
+        case "livre":
             titre = "Votre commande a ete livree !";
             messageStatut = "Votre commande a bien ete livree. Nous esperons que vous l'apprecierez ! N'hesitez pas a laisser un avis.";
+            break;
+        case "attente_retour_materiel":
+            titre = "Retour du materiel a prevoir";
+            messageStatut = "Votre commande est livree. Merci de prevoir le retour du materiel prete sous 10 jours.";
+            break;
+        case "terminee":
+            titre = "Votre commande est terminee";
+            messageStatut = "Tout est finalise. Merci pour votre confiance ! N'hesitez pas a laisser un avis sur notre site.";
+            break;
+        case "annulee":
+            titre = "Votre commande a ete annulee";
+            messageStatut = "Votre commande a ete annulee. Pour toute question, n'hesitez pas a nous contacter.";
             break;
         default:
             titre = "Mise a jour de votre commande";
