@@ -28,6 +28,7 @@ import routesAvis from "./routes/avis";
 import routesUtilisateurs from "./routes/utilisateur";
 import routesStats from "./routes/stats";
 import routesContact from "./routes/contact";
+import routesHoraires from "./routes/horaire";
 import { demarrerCronAnonymisation } from "./services/cronAnonymisation";
 
 // On charge les variables du fichier .env
@@ -119,6 +120,10 @@ app.use("/api/stats", routesStats);
 
 // Route du formulaire de contact : /api/contact (avec limiteur)
 app.use("/api/contact", limiteurContact, routesContact);
+
+// Routes des horaires : /api/horaires
+// Lecture publique (page Contact/Accueil), modification admin
+app.use("/api/horaires", routesHoraires);
 
 // ============================================================
 // LANCEMENT DU SERVEUR
