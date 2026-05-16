@@ -396,3 +396,124 @@ export async function reactiverUtilisateur(req: Request, res: Response) {
         res.status(500).json({ erreur: "Erreur serveur" });
     }
 }
+
+// ============================================================
+// DEMANDER LA SUPPRESSION DE SON COMPTE (RGPD - DROIT A L'OUBLI)
+// POST /api/utilisateurs/moi/demander-suppression
+//
+// Conformement au RGPD article 17, l'utilisateur peut demander
+// la suppression de ses donnees. Periode de grace de 30 jours
+// avant anonymisation effective (laisse le temps de revenir).
+//
+// Pendant ces 30 jours, le compte est desactive (connexion bloquee).
+// Apres 30 jours, le cron anonymise les donnees personnelles.
+// L'utilisateur_id reste pour les FK des commandes (obligation comptable).
+// ============================================================
+export async function demanderSuppressionRGPD(req: Request, res: Response) {
+    try {
+        const utilisateurId = req.session.utilisateur!.id;
+
+        // Verifier que l'utilisateur n'a pas deja une demande en cours
+        const resultat = await pool.query(
+            `SELECT utilisateur_id, date_suppression_demandee, est_anonymise
+             FROM utilisateur 
+             WHERE utilisateur_id = $1`,
+            [utilisateurId]
+        );
+
+        if (resultat.rows.length === 0) {
+            return res.status(404).json({ erreur: "Utilisateur introuvable" });
+        }
+
+        const utilisateur = resultat.rows[0];
+
+        if (utilisateur.est_anonymise) {
+            return res.status(410).json({ 
+                erreur: "Ce compte a deja ete supprime definitivement (anonymise)" 
+            });
+        }
+
+        if (utilisateur.date_suppression_demandee !== null) {
+            return res.status(409).json({ 
+                erreur: "Une demande de suppression est deja en cours pour ce compte" 
+            });
+        }
+
+        // Enregistrer la demande de suppression
+        await pool.query(
+            `UPDATE utilisateur 
+             SET date_suppression_demandee = CURRENT_TIMESTAMP
+             WHERE utilisateur_id = $1`,
+            [utilisateurId]
+        );
+
+        // Destruction de la session (deconnexion immediate)
+        req.session.destroy((erreur) => {
+            if (erreur) {
+                console.error("Erreur lors de la destruction de la session :", erreur);
+            }
+            res.clearCookie("connect.sid");
+            res.json({ 
+                message: "Demande de suppression enregistree. Votre compte sera anonymise dans 30 jours. Vous pouvez annuler cette demande en vous reconnectant via le support avant ce delai." 
+            });
+        });
+
+    } catch (erreur) {
+        console.error("Erreur lors de la demande de suppression RGPD :", erreur);
+        res.status(500).json({ erreur: "Erreur serveur" });
+    }
+}
+
+// ============================================================
+// ANNULER LA DEMANDE DE SUPPRESSION (RGPD)
+// POST /api/utilisateurs/:id/annuler-suppression
+//
+// Reserve aux administrateurs (le client ne peut plus se connecter
+// puisque son compte est desactive : il doit passer par le support).
+// Possible tant que l'anonymisation n'a pas eu lieu (est_anonymise = FALSE).
+// ============================================================
+export async function annulerSuppressionRGPD(req: Request, res: Response) {
+    try {
+        const { id } = req.params;
+
+        const resultat = await pool.query(
+            `SELECT utilisateur_id, date_suppression_demandee, est_anonymise
+             FROM utilisateur 
+             WHERE utilisateur_id = $1`,
+            [id]
+        );
+
+        if (resultat.rows.length === 0) {
+            return res.status(404).json({ erreur: "Utilisateur introuvable" });
+        }
+
+        const utilisateur = resultat.rows[0];
+
+        if (utilisateur.est_anonymise) {
+            return res.status(410).json({ 
+                erreur: "Ce compte a deja ete anonymise definitivement, impossible de l'annuler" 
+            });
+        }
+
+        if (utilisateur.date_suppression_demandee === null) {
+            return res.status(400).json({ 
+                erreur: "Aucune demande de suppression en cours pour ce compte" 
+            });
+        }
+
+        // Annuler la demande
+        await pool.query(
+            `UPDATE utilisateur 
+             SET date_suppression_demandee = NULL
+             WHERE utilisateur_id = $1`,
+            [id]
+        );
+
+        res.json({ message: "Demande de suppression annulee avec succes" });
+
+    } catch (erreur) {
+        console.error("Erreur lors de l'annulation de la suppression RGPD :", erreur);
+        res.status(500).json({ erreur: "Erreur serveur" });
+    }
+}
+

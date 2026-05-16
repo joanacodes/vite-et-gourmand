@@ -28,6 +28,7 @@ import routesAvis from "./routes/avis";
 import routesUtilisateurs from "./routes/utilisateur";
 import routesStats from "./routes/stats";
 import routesContact from "./routes/contact";
+import { demarrerCronAnonymisation } from "./services/cronAnonymisation";
 
 // On charge les variables du fichier .env
 dotenv.config();
@@ -129,6 +130,9 @@ async function demarrerServeur() {
 
   // On se connecte a MongoDB (necessaire avant de lancer les sessions)
   await connecterMongoDB();
+
+  // On demarre le cron quotidien d'anonymisation RGPD (3h du matin)
+  demarrerCronAnonymisation();
 
   // On lance le serveur Express
   app.listen(PORT, () => {

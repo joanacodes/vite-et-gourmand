@@ -13,7 +13,9 @@ import {
     creerEmploye,
     modifierRole,
     desactiverUtilisateur,
-    reactiverUtilisateur
+    reactiverUtilisateur,
+    demanderSuppressionRGPD,
+    annulerSuppressionRGPD
 } from "../controleurs/utilisateur";
 import { estConnecte, estAdmin } from "../middlewares/auth";
 
@@ -34,6 +36,18 @@ routeur.put("/mot-de-passe", estConnecte, changerMotDePasse);
 
 // Desactiver son propre compte
 routeur.delete("/profil", estConnecte, desactiverPropreCompte);
+
+
+// ============================================================
+// ROUTES RGPD (droit a l'oubli)
+// ============================================================
+
+// Demander la suppression de son compte (utilisateur connecte)
+// Periode de grace de 30 jours avant anonymisation
+routeur.post("/moi/demander-suppression", estConnecte, demanderSuppressionRGPD);
+
+// Annuler une demande de suppression (admin uniquement, sur demande du client via support)
+routeur.post("/:id/annuler-suppression", estAdmin, annulerSuppressionRGPD);
 
 
 // ============================================================

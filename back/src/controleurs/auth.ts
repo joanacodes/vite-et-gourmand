@@ -108,7 +108,8 @@ export async function connexion(req: Request, res: Response) {
 
         // Recuperation de l'utilisateur en BDD avec son role
         const resultat = await pool.query(
-            `SELECT u.utilisateur_id, u.email, u.mot_de_passe, u.nom, u.prenom, u.actif, r.libelle AS role
+            `SELECT u.utilisateur_id, u.email, u.mot_de_passe, u.nom, u.prenom, u.actif, 
+                    u.date_suppression_demandee, u.est_anonymise, r.libelle AS role
              FROM utilisateur u
              JOIN role r ON u.role_id = r.role_id
              WHERE u.email = $1`,
@@ -121,6 +122,19 @@ export async function connexion(req: Request, res: Response) {
         }
 
         const utilisateur = resultat.rows[0];
+
+        // Verification RGPD : compte anonymise (definitivement supprime)
+        // Reponse generique pour ne pas reveler que ce compte a existe
+        if (utilisateur.est_anonymise) {
+            return res.status(401).json({ erreur: "Email ou mot de passe incorrect" });
+        }
+
+        // Verification RGPD : compte en cours de suppression (periode de grace 30 jours)
+        if (utilisateur.date_suppression_demandee !== null) {
+            return res.status(403).json({ 
+                erreur: "Ce compte a fait l'objet d'une demande de suppression. Contactez le support pour annuler la procedure." 
+            });
+        }
 
         // Verification que le compte est actif
         if (!utilisateur.actif) {
