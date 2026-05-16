@@ -77,8 +77,9 @@ COMMENT ON COLUMN utilisateur.est_anonymise IS
 -- Utile pour les requetes courantes du back-end : SELECT * FROM utilisateur_actif WHERE ...
 CREATE OR REPLACE VIEW utilisateur_actif AS
 SELECT 
-    utilisateur_id, nom, prenom, email, mot_de_passe, telephone, role,
-    date_inscription, date_suppression_demandee
+    utilisateur_id, email, mot_de_passe, nom, prenom, telephone,
+    ville, pays, adresse_postale, actif, date_creation, role_id,
+    date_suppression_demandee
 FROM utilisateur
 WHERE est_anonymise = FALSE
   AND date_suppression_demandee IS NULL;
