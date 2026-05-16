@@ -34,7 +34,7 @@ DELETE FROM avis WHERE avis_id IN (
 DELETE FROM commande_note_interne WHERE numero_commande LIKE 'CMD-TEST-%';
 
 -- Suppression de l'historique des commandes test
-DELETE FROM historique_statut_commande WHERE numero_commande LIKE 'CMD-TEST-%';
+DELETE FROM commande_statut_historique WHERE numero_commande LIKE 'CMD-TEST-%';
 
 -- Suppression des commandes test
 DELETE FROM commande WHERE numero_commande LIKE 'CMD-TEST-%';
