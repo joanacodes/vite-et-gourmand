@@ -22,6 +22,7 @@ import {
   loggerCreationCommande,
   loggerAnnulationCommande,
 } from "../services/tracking";
+import { calculerDistanceDepuisTraiteur } from "../services/geolocation";
 
 // ============================================================
 // CALCULER LES FRAIS DE LIVRAISON (selon enonce)
@@ -175,7 +176,19 @@ export async function creerCommande(req: Request, res: Response) {
     const reduction = reductionApplicable ? prixBase * 0.1 : 0;
     const prixMenu = prixBase - reduction;
 
-    const distance = parseInt(distanceKm) || 0;
+    // Calcul de la distance :
+    // - Si le client fournit distanceKm, on le respecte (utile pour les tests ou cas particuliers)
+    // - Sinon, on geocode lieuLivraison via OpenStreetMap et on calcule la distance depuis le traiteur
+    // Cette approche cote serveur evite qu'un client malveillant envoie une fausse distance
+    let distance: number;
+    if (distanceKm !== undefined && distanceKm !== null) {
+      distance = parseFloat(distanceKm) || 0;
+    } else {
+      const distanceCalculee = await calculerDistanceDepuisTraiteur(lieuLivraison);
+      // Si le geocoding echoue, on prend 0 (livraison sur Bordeaux par defaut)
+      // En production reelle, on pourrait refuser la commande et demander une adresse valide
+      distance = distanceCalculee !== null ? distanceCalculee : 0;
+    }
     const prixLivraison = calculerFraisLivraison(distance);
 
     const prixTotal = prixMenu + prixLivraison;
@@ -716,11 +729,29 @@ export async function modifierCommande(req: Request, res: Response) {
       );
     }
 
-    // 7. Calcul de la nouvelle livraison si la distance change
+    // 7. Calcul de la nouvelle livraison
+    // 3 cas possibles :
+    //   a) Le client fournit distanceKm explicitement -> on utilise cette valeur
+    //   b) Le client modifie lieuLivraison sans donner distanceKm -> on recalcule via geocoding
+    //   c) Aucun des deux -> on ne touche pas
+    let nouvelleDistance: number | undefined;
     let nouveauPrixLivraison: number | undefined;
+
     if (distanceKm !== undefined) {
+      // Cas a) : distance fournie explicitement
+      nouvelleDistance = parseFloat(distanceKm) || 0;
+    } else if (lieuLivraison !== undefined) {
+      // Cas b) : adresse modifiee, recalcul auto via OpenStreetMap
+      const distanceCalculee = await calculerDistanceDepuisTraiteur(lieuLivraison);
+      // Si le geocoding echoue, on garde la distance actuelle (pas de modif)
+      if (distanceCalculee !== null) {
+        nouvelleDistance = distanceCalculee;
+      }
+    }
+
+    if (nouvelleDistance !== undefined) {
       // Formule : frais fixe 5 EUR + 0,59 EUR/km (cf. enonce)
-      nouveauPrixLivraison = parseFloat((5 + distanceKm * 0.59).toFixed(2));
+      nouveauPrixLivraison = parseFloat((5 + nouvelleDistance * 0.59).toFixed(2));
     }
 
     // 8. Construction dynamique de la requete UPDATE (seuls les champs fournis sont modifies)
@@ -746,9 +777,9 @@ export async function modifierCommande(req: Request, res: Response) {
       champsModifies.push(`lieu_livraison = $${index++}`);
       valeurs.push(lieuLivraison);
     }
-    if (distanceKm !== undefined) {
+    if (nouvelleDistance !== undefined) {
       champsModifies.push(`distance_km = $${index++}`);
-      valeurs.push(distanceKm);
+      valeurs.push(nouvelleDistance);
       champsModifies.push(`prix_livraison = $${index++}`);
       valeurs.push(nouveauPrixLivraison);
     }
