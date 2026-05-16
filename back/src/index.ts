@@ -22,6 +22,7 @@ import routesAuth from "./routes/auth";
 import routesMenus from "./routes/menu";
 import routesPlats from "./routes/plat";
 import routesCommandes from "./routes/commande";
+import routesCommandeNotesInternes from "./routes/commandeNoteInterne";
 import routesAvis from "./routes/avis";
 import routesUtilisateurs from "./routes/utilisateur";
 import routesStats from "./routes/stats";
@@ -96,6 +97,10 @@ app.use("/api/plats", routesPlats);
 
 // Routes des commandes : /api/commandes/...
 app.use("/api/commandes", routesCommandes);
+
+// Routes des notes internes de commande : /api/commandes/:numero/notes-internes
+// Sous-ressource des commandes, reservee a l'equipe interne
+app.use("/api/commandes/:numero/notes-internes", routesCommandeNotesInternes);
 
 // Routes des avis : /api/avis/...
 app.use("/api/avis", routesAvis);
