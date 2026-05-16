@@ -86,9 +86,27 @@ export async function listerMenus(req: Request, res: Response) {
     // Execution de la requete
     const resultat = await pool.query(requete, parametres);
 
+    // Pour chaque menu, on recupere son image principale (LEFT JOIN simule)
+    // pour servir de vignette dans la liste publique
+    const menusAvecImage = await Promise.all(
+      resultat.rows.map(async (menu: any) => {
+        const resultatImage = await pool.query(
+          `SELECT image_id, url, legende
+                     FROM menu_image
+                     WHERE menu_id = $1 AND est_principale = TRUE
+                     LIMIT 1`,
+          [menu.menu_id],
+        );
+        return {
+          ...menu,
+          image_principale: resultatImage.rows[0] || null,
+        };
+      }),
+    );
+
     res.json({
-      menus: resultat.rows,
-      nombre: resultat.rows.length,
+      menus: menusAvecImage,
+      nombre: menusAvecImage.length,
     });
   } catch (erreur) {
     console.error("Erreur lors de la recuperation des menus :", erreur);
@@ -163,6 +181,15 @@ export async function detailMenu(req: Request, res: Response) {
       [id],
     );
 
+    // Recuperation des images du menu (galerie ordonnee, principale en premier)
+    const resultatImages = await pool.query(
+      `SELECT image_id, url, legende, est_principale, ordre_affichage
+             FROM menu_image
+             WHERE menu_id = $1
+             ORDER BY est_principale DESC, ordre_affichage ASC, image_id ASC`,
+      [id],
+    );
+
     // ----- TRACKING MONGODB -----
     // On enregistre cette consultation (sans bloquer la reponse)
     // Si l'utilisateur n'est pas connecte, on logge tout de meme avec utilisateurId = null
@@ -175,6 +202,7 @@ export async function detailMenu(req: Request, res: Response) {
         ...menu,
         plats: plats,
         regimes: resultatRegimes.rows,
+        images: resultatImages.rows,
       },
     });
   } catch (erreur) {

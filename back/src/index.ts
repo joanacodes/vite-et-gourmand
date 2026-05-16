@@ -20,6 +20,7 @@ import {
 } from "./config/securite";
 import routesAuth from "./routes/auth";
 import routesMenus from "./routes/menu";
+import routesMenuImages from "./routes/menuImage";
 import routesPlats from "./routes/plat";
 import routesCommandes from "./routes/commande";
 import routesCommandeNotesInternes from "./routes/commandeNoteInterne";
@@ -91,6 +92,10 @@ app.use("/api/auth", routesAuth);
 
 // Routes des menus : /api/menus/...
 app.use("/api/menus", routesMenus);
+
+// Routes des images de menu : /api/menus/:menuId/images
+// Sous-ressource des menus, lecture publique + ecriture admin/employe
+app.use("/api/menus/:menuId/images", routesMenuImages);
 
 // Routes des plats : /api/plats/...
 app.use("/api/plats", routesPlats);
