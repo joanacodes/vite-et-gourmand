@@ -8,6 +8,7 @@ import {
     creerCommande,
     listerCommandes,
     detailCommande,
+    modifierCommande,
     modifierStatutCommande,
     annulerCommande,
     obtenirHistoriqueCommande,
@@ -32,6 +33,9 @@ routeur.get("/:numero/historique", obtenirHistoriqueCommande);
 
 // Creer une commande
 routeur.post("/", creerCommande);
+
+// Modifier une commande (utilisateur, uniquement si statut "en_attente")
+routeur.put("/:numero", modifierCommande);
 
 // Annuler une commande (utilisateur ou employe)
 routeur.put("/:numero/annuler", annulerCommande);

@@ -624,3 +624,180 @@ export async function annulerCommande(req: Request, res: Response) {
     client.release();
   }
 }
+
+// ============================================================
+// MODIFIER UNE COMMANDE (utilisateur, statut "en_attente" uniquement)
+// PUT /api/commandes/:numero
+// Body : { nombrePersonnes?, datePrestation?, heureLivraison?, lieuLivraison?,
+//          distanceKm?, pretMateriel?, notesClient? }
+//
+// Regles metier :
+// - Seul le proprietaire de la commande peut la modifier
+// - La commande doit etre au statut "en_attente"
+// - Le menu n'est PAS modifiable (il faut annuler + recreer pour changer)
+// - Le nombre de personnes ne peut pas etre inferieur au minimum du menu
+// - Le prix est recalcule automatiquement cote serveur
+// ============================================================
+export async function modifierCommande(req: Request, res: Response) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const utilisateur = req.session.utilisateur!;
+    const { numero } = req.params;
+    const {
+      nombrePersonnes,
+      datePrestation,
+      heureLivraison,
+      lieuLivraison,
+      distanceKm,
+      pretMateriel,
+      notesClient,
+    } = req.body;
+
+    // 1. Verification que la commande existe + recuperation des infos
+    const resultatCommande = await client.query(
+      `SELECT c.utilisateur_id, c.statut, c.menu_id,
+                    m.prix_par_personne, m.nombre_personnes_minimum
+             FROM commande c
+             JOIN menu m ON c.menu_id = m.menu_id
+             WHERE c.numero_commande = $1`,
+      [numero],
+    );
+
+    if (resultatCommande.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ erreur: "Commande introuvable" });
+    }
+
+    const commande = resultatCommande.rows[0];
+
+    // 2. Verification que l'utilisateur est bien le proprietaire
+    if (commande.utilisateur_id !== utilisateur.id) {
+      await client.query("ROLLBACK");
+      return res.status(403).json({
+        erreur: "Vous ne pouvez modifier que vos propres commandes",
+      });
+    }
+
+    // 3. Verification que le statut autorise la modification
+    if (commande.statut !== "en_attente") {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        erreur:
+          "Cette commande ne peut plus etre modifiee (deja acceptee par notre equipe). Contactez-nous pour toute demande de changement.",
+      });
+    }
+
+    // 4. Validation du nombre de personnes (si fourni)
+    if (
+      nombrePersonnes !== undefined &&
+      nombrePersonnes < commande.nombre_personnes_minimum
+    ) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        erreur: `Le nombre de personnes doit etre superieur ou egal a ${commande.nombre_personnes_minimum} (minimum du menu)`,
+      });
+    }
+
+    // 5. Validation de la longueur des notes client
+    if (notesClient !== undefined && notesClient !== null && notesClient.length > 500) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        erreur: "Les notes client ne peuvent pas depasser 500 caracteres",
+      });
+    }
+
+    // 6. Calcul du nouveau prix menu si le nombre de personnes change
+    let nouveauPrixMenu: number | undefined;
+    if (nombrePersonnes !== undefined) {
+      nouveauPrixMenu = parseFloat(
+        (nombrePersonnes * commande.prix_par_personne).toFixed(2),
+      );
+    }
+
+    // 7. Calcul de la nouvelle livraison si la distance change
+    let nouveauPrixLivraison: number | undefined;
+    if (distanceKm !== undefined) {
+      // Formule : frais fixe 5 EUR + 0,59 EUR/km (cf. enonce)
+      nouveauPrixLivraison = parseFloat((5 + distanceKm * 0.59).toFixed(2));
+    }
+
+    // 8. Construction dynamique de la requete UPDATE (seuls les champs fournis sont modifies)
+    const champsModifies: string[] = [];
+    const valeurs: any[] = [];
+    let index = 1;
+
+    if (nombrePersonnes !== undefined) {
+      champsModifies.push(`nombre_personnes = $${index++}`);
+      valeurs.push(nombrePersonnes);
+      champsModifies.push(`prix_menu = $${index++}`);
+      valeurs.push(nouveauPrixMenu);
+    }
+    if (datePrestation !== undefined) {
+      champsModifies.push(`date_prestation = $${index++}`);
+      valeurs.push(datePrestation);
+    }
+    if (heureLivraison !== undefined) {
+      champsModifies.push(`heure_livraison = $${index++}`);
+      valeurs.push(heureLivraison);
+    }
+    if (lieuLivraison !== undefined) {
+      champsModifies.push(`lieu_livraison = $${index++}`);
+      valeurs.push(lieuLivraison);
+    }
+    if (distanceKm !== undefined) {
+      champsModifies.push(`distance_km = $${index++}`);
+      valeurs.push(distanceKm);
+      champsModifies.push(`prix_livraison = $${index++}`);
+      valeurs.push(nouveauPrixLivraison);
+    }
+    if (pretMateriel !== undefined) {
+      champsModifies.push(`pret_materiel = $${index++}`);
+      valeurs.push(pretMateriel);
+    }
+    if (notesClient !== undefined) {
+      champsModifies.push(`notes_client = $${index++}`);
+      valeurs.push(notesClient || null);
+    }
+
+    // Si rien n'a ete envoye, on retourne une erreur (evite un UPDATE vide)
+    if (champsModifies.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        erreur: "Aucune modification fournie. Envoyez au moins un champ a modifier.",
+      });
+    }
+
+    // Ajout du numero de commande comme dernier parametre (pour le WHERE)
+    valeurs.push(numero);
+
+    // 9. Execution de l'UPDATE
+    await client.query(
+      `UPDATE commande SET ${champsModifies.join(", ")} WHERE numero_commande = $${index}`,
+      valeurs,
+    );
+
+    // 10. Recuperation de la commande mise a jour pour la reponse
+    const commandeFinale = await client.query(
+      `SELECT c.*, m.titre AS menu_titre
+             FROM commande c
+             JOIN menu m ON c.menu_id = m.menu_id
+             WHERE c.numero_commande = $1`,
+      [numero],
+    );
+
+    await client.query("COMMIT");
+
+    res.json({
+      message: "Commande modifiee avec succes",
+      commande: commandeFinale.rows[0],
+    });
+  } catch (erreur) {
+    await client.query("ROLLBACK");
+    console.error("Erreur lors de la modification de la commande :", erreur);
+    res.status(500).json({ erreur: "Erreur serveur" });
+  } finally {
+    client.release();
+  }
+}
