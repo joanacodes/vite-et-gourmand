@@ -19,12 +19,20 @@ import TokenReinitialisation from "../modeles/token";
 // ============================================================
 // INSCRIPTION
 // POST /api/auth/inscription
-// Body : { email, motDePasse, nom, prenom, telephone, ville, pays, adressePostale }
+// Body : { email, motDePasse, nom, prenom, telephone, ville, pays, adressePostale,
+//          notifNewsletter?, notifOffres?, notifConseils? }
+//
+// notif_commandes est TRUE par defaut (transactionnel, lie au contrat)
+// notif_newsletter / notif_offres / notif_conseils sont FALSE par defaut
+// L'utilisateur peut cocher des cases a l'inscription pour les activer (opt-in CNIL)
 // ============================================================
 export async function inscription(req: Request, res: Response) {
     try {
         // On recupere les donnees envoyees par le client
-        const { email, motDePasse, nom, prenom, telephone, ville, pays, adressePostale } = req.body;
+        const { 
+            email, motDePasse, nom, prenom, telephone, ville, pays, adressePostale,
+            notifNewsletter, notifOffres, notifConseils
+        } = req.body;
 
         // Verification que les champs obligatoires sont presents
         if (!email || !motDePasse || !nom || !prenom) {
@@ -58,17 +66,26 @@ export async function inscription(req: Request, res: Response) {
         const motDePasseHashe = await bcrypt.hash(motDePasse, 10);
 
         // Insertion du nouvel utilisateur en BDD avec le role "utilisateur" (id = 1)
+        // Les preferences marketing sont opt-in (CNIL) : FALSE par defaut sauf si choix explicite
         const resultat = await pool.query(
-            `INSERT INTO utilisateur (email, mot_de_passe, nom, prenom, telephone, ville, pays, adresse_postale, role_id)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 1)
+            `INSERT INTO utilisateur 
+                (email, mot_de_passe, nom, prenom, telephone, ville, pays, adresse_postale, role_id,
+                 notif_newsletter, notif_offres, notif_conseils)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 1, $9, $10, $11)
              RETURNING utilisateur_id, email, nom, prenom`,
-            [email, motDePasseHashe, nom, prenom, telephone, ville, pays, adressePostale]
+            [
+                email, motDePasseHashe, nom, prenom, telephone, ville, pays, adressePostale,
+                notifNewsletter === true,
+                notifOffres === true,
+                notifConseils === true
+            ]
         );
 
         const nouvelUtilisateur = resultat.rows[0];
 
         // Envoi de l'email de bienvenue (asynchrone, on n'attend pas)
-        envoyerEmailBienvenue(email, prenom).catch((erreur) => {
+        // RGPD : verifie la preference notif_commandes avant envoi
+        envoyerEmailBienvenue(email, prenom, nouvelUtilisateur.utilisateur_id).catch((erreur) => {
             console.error("Erreur lors de l'envoi de l'email de bienvenue :", erreur);
         });
 

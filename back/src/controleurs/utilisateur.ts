@@ -31,6 +31,7 @@ export async function recupererProfil(req: Request, res: Response) {
         const resultat = await pool.query(
             `SELECT u.utilisateur_id, u.email, u.nom, u.prenom, u.telephone, 
                     u.ville, u.pays, u.adresse_postale, u.actif, u.date_creation,
+                    u.notif_commandes, u.notif_newsletter, u.notif_offres, u.notif_conseils,
                     r.libelle AS role
              FROM utilisateur u
              JOIN role r ON u.role_id = r.role_id
@@ -56,7 +57,13 @@ export async function recupererProfil(req: Request, res: Response) {
                 adressePostale: utilisateur.adresse_postale,
                 actif: utilisateur.actif,
                 dateCreation: utilisateur.date_creation,
-                role: utilisateur.role
+                role: utilisateur.role,
+                preferences: {
+                    notifCommandes: utilisateur.notif_commandes,
+                    notifNewsletter: utilisateur.notif_newsletter,
+                    notifOffres: utilisateur.notif_offres,
+                    notifConseils: utilisateur.notif_conseils
+                }
             }
         });
 
@@ -71,13 +78,18 @@ export async function recupererProfil(req: Request, res: Response) {
 // MODIFIER SON PROFIL
 // PUT /api/utilisateurs/profil
 // Reserve aux connectes
-// Body : { nom, prenom, telephone, ville, pays, adressePostale }
+// Body : { nom, prenom, telephone, ville, pays, adressePostale,
+//          notifCommandes?, notifNewsletter?, notifOffres?, notifConseils? }
 // L'email et le mot de passe ne sont PAS modifiables ici (routes dediees)
+// Les preferences notifs (RGPD) sont optionnelles et peuvent etre modifiees seules
 // ============================================================
 export async function modifierProfil(req: Request, res: Response) {
     try {
         const utilisateurId = req.session.utilisateur!.id;
-        const { nom, prenom, telephone, ville, pays, adressePostale } = req.body;
+        const { 
+            nom, prenom, telephone, ville, pays, adressePostale,
+            notifCommandes, notifNewsletter, notifOffres, notifConseils
+        } = req.body;
 
         if (!nom || !prenom) {
             return res.status(400).json({
@@ -85,11 +97,47 @@ export async function modifierProfil(req: Request, res: Response) {
             });
         }
 
+        // Construction dynamique du UPDATE pour les champs profil + preferences
+        // (les preferences ne sont mises a jour que si elles sont fournies)
+        const champsModifies: string[] = [
+            "nom = $1",
+            "prenom = $2",
+            "telephone = $3",
+            "ville = $4",
+            "pays = $5",
+            "adresse_postale = $6"
+        ];
+        const valeurs: any[] = [
+            nom, prenom, telephone || null, ville || null, pays || null, adressePostale || null
+        ];
+        let index = 7;
+
+        // Preferences notifs : ajout conditionnel (RGPD)
+        if (notifCommandes !== undefined) {
+            champsModifies.push(`notif_commandes = $${index++}`);
+            valeurs.push(notifCommandes === true);
+        }
+        if (notifNewsletter !== undefined) {
+            champsModifies.push(`notif_newsletter = $${index++}`);
+            valeurs.push(notifNewsletter === true);
+        }
+        if (notifOffres !== undefined) {
+            champsModifies.push(`notif_offres = $${index++}`);
+            valeurs.push(notifOffres === true);
+        }
+        if (notifConseils !== undefined) {
+            champsModifies.push(`notif_conseils = $${index++}`);
+            valeurs.push(notifConseils === true);
+        }
+
+        // Ajout de l'utilisateurId pour le WHERE
+        valeurs.push(utilisateurId);
+
         await pool.query(
             `UPDATE utilisateur 
-             SET nom = $1, prenom = $2, telephone = $3, ville = $4, pays = $5, adresse_postale = $6
-             WHERE utilisateur_id = $7`,
-            [nom, prenom, telephone || null, ville || null, pays || null, adressePostale || null, utilisateurId]
+             SET ${champsModifies.join(", ")}
+             WHERE utilisateur_id = $${index}`,
+            valeurs
         );
 
         res.json({ message: "Profil modifie avec succes" });

@@ -244,11 +244,13 @@ export async function creerCommande(req: Request, res: Response) {
     await client.query("COMMIT");
 
     // Envoi de l'email de confirmation
+    // RGPD : verifie la preference notif_commandes avant envoi
     const utilisateur = resultatUtilisateur.rows[0];
     envoyerEmailConfirmationCommande(
       utilisateur.email,
       utilisateur.prenom,
       numeroCommande,
+      utilisateurId,
     ).catch((erreur) => {
       console.error("Erreur lors de l'envoi de l'email :", erreur);
     });
@@ -478,7 +480,7 @@ export async function modifierStatutCommande(req: Request, res: Response) {
 
     // Verification que la commande existe
     const commandeExiste = await client.query(
-      `SELECT c.numero_commande, c.pret_materiel, u.email, u.prenom
+      `SELECT c.numero_commande, c.pret_materiel, u.utilisateur_id, u.email, u.prenom
              FROM commande c
              JOIN utilisateur u ON c.utilisateur_id = u.utilisateur_id
              WHERE c.numero_commande = $1`,
@@ -510,11 +512,13 @@ export async function modifierStatutCommande(req: Request, res: Response) {
     await client.query("COMMIT");
 
     // Envoi de l'email de notification (asynchrone)
+    // RGPD : verifie la preference notif_commandes avant envoi
     envoyerEmailStatutCommande(
       infoCommande.email,
       infoCommande.prenom,
       numero as string,
       statut,
+      infoCommande.utilisateur_id,
     ).catch((erreur) => {
       console.error("Erreur lors de l'envoi de l'email statut :", erreur);
     });
@@ -616,11 +620,13 @@ export async function annulerCommande(req: Request, res: Response) {
     await client.query("COMMIT");
 
     // Envoi de l'email d'annulation
+    // RGPD : verifie la preference notif_commandes avant envoi
     envoyerEmailAnnulationCommande(
       commande.email,
       commande.prenom,
       numero as string,
       motifAnnulation || "Aucun motif precise",
+      commande.utilisateur_id,
     ).catch((erreur) => {
       console.error("Erreur lors de l'envoi de l'email d'annulation :", erreur);
     });

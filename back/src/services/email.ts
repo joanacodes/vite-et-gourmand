@@ -2,10 +2,17 @@
 // SERVICE D'ENVOI D'EMAILS
 // Centralise toutes les fonctions d'envoi d'emails de l'application
 // Utilise Nodemailer + Mailtrap (en dev) / Brevo (en prod)
+//
+// RGPD : avant chaque envoi d'email transactionnel/marketing, on
+// verifie la preference de l'utilisateur via verifierPreferenceEmail().
+// Exceptions (toujours envoyes) :
+// - Email de reinitialisation de mot de passe (securite obligatoire)
+// - Email de formulaire de contact (envoye a l'equipe, pas au client)
 // ============================================================
 
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import pool from "../config/postgres";
 
 dotenv.config();
 
@@ -21,10 +28,67 @@ const transporteur = nodemailer.createTransport({
 
 
 // ============================================================
+// VERIFIER UNE PREFERENCE D'EMAIL (RGPD)
+//
+// Avant d'envoyer un email a un utilisateur, on verifie qu'il a
+// bien donne son consentement pour ce type d'email.
+//
+// Retourne true si l'envoi est autorise, false sinon.
+// Si l'utilisateur n'existe pas, on retourne false (securite).
+//
+// Note : on ignore les utilisateurs anonymises (est_anonymise = TRUE).
+// ============================================================
+type TypePreference = "notif_commandes" | "notif_newsletter" | "notif_offres" | "notif_conseils";
+
+async function verifierPreferenceEmail(
+    utilisateurId: number,
+    typePreference: TypePreference
+): Promise<boolean> {
+    try {
+        const resultat = await pool.query(
+            `SELECT ${typePreference}, est_anonymise
+             FROM utilisateur
+             WHERE utilisateur_id = $1`,
+            [utilisateurId]
+        );
+
+        if (resultat.rows.length === 0) {
+            return false;
+        }
+
+        const utilisateur = resultat.rows[0];
+
+        // On n'envoie pas d'email aux comptes anonymises
+        if (utilisateur.est_anonymise) {
+            return false;
+        }
+
+        return utilisateur[typePreference] === true;
+    } catch (erreur) {
+        console.error(`Erreur lors de la verification de la preference ${typePreference} :`, erreur);
+        // En cas d'erreur, on prefere ne pas envoyer (principe de minimisation RGPD)
+        return false;
+    }
+}
+
+
+// ============================================================
 // EMAIL DE BIENVENUE
 // Envoye apres l'inscription d'un nouvel utilisateur
+// Type : transactionnel (lie au compte cree) -> notif_commandes
 // ============================================================
-export async function envoyerEmailBienvenue(email: string, prenom: string) {
+export async function envoyerEmailBienvenue(
+    email: string,
+    prenom: string,
+    utilisateurId: number
+) {
+    // RGPD : verifier le consentement avant envoi
+    const peutEnvoyer = await verifierPreferenceEmail(utilisateurId, "notif_commandes");
+    if (!peutEnvoyer) {
+        console.log(`[RGPD] Email de bienvenue non envoye a ${email} (preference desactivee)`);
+        return;
+    }
+
     const contenuHTML = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #c0392b;">Bienvenue chez Vite & Gourmand, ${prenom} !</h1>
@@ -46,6 +110,8 @@ export async function envoyerEmailBienvenue(email: string, prenom: string) {
 
 // ============================================================
 // EMAIL DE REINITIALISATION DU MOT DE PASSE
+// EXCEPTION RGPD : toujours envoye (securite obligatoire)
+// L'utilisateur ne peut pas refuser un email de securite
 // ============================================================
 export async function envoyerEmailReinitialisation(email: string, lienReinitialisation: string) {
     const contenuHTML = `
@@ -70,9 +136,21 @@ export async function envoyerEmailReinitialisation(email: string, lienReinitiali
 
 // ============================================================
 // EMAIL DE CONFIRMATION DE COMMANDE
-// Envoye quand le client passe une commande (statut initial : en_attente)
+// Type : transactionnel (lie au contrat de vente) -> notif_commandes
 // ============================================================
-export async function envoyerEmailConfirmationCommande(email: string, prenom: string, numeroCommande: string) {
+export async function envoyerEmailConfirmationCommande(
+    email: string,
+    prenom: string,
+    numeroCommande: string,
+    utilisateurId: number
+) {
+    // RGPD : verifier le consentement avant envoi
+    const peutEnvoyer = await verifierPreferenceEmail(utilisateurId, "notif_commandes");
+    if (!peutEnvoyer) {
+        console.log(`[RGPD] Email de confirmation commande non envoye a ${email} (preference desactivee)`);
+        return;
+    }
+
     const contenuHTML = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #c0392b;">Commande bien recue !</h1>
@@ -95,14 +173,22 @@ export async function envoyerEmailConfirmationCommande(email: string, prenom: st
 
 // ============================================================
 // EMAIL DE CHANGEMENT DE STATUT D'UNE COMMANDE
-// Envoye quand l'employe/admin change le statut d'une commande
+// Type : transactionnel -> notif_commandes
 // ============================================================
 export async function envoyerEmailStatutCommande(
-    email: string, 
-    prenom: string, 
-    numeroCommande: string, 
-    nouveauStatut: string
+    email: string,
+    prenom: string,
+    numeroCommande: string,
+    nouveauStatut: string,
+    utilisateurId: number
 ) {
+    // RGPD : verifier le consentement avant envoi
+    const peutEnvoyer = await verifierPreferenceEmail(utilisateurId, "notif_commandes");
+    if (!peutEnvoyer) {
+        console.log(`[RGPD] Email de changement de statut non envoye a ${email} (preference desactivee)`);
+        return;
+    }
+
     // Message personnalise selon le nouveau statut
     let messageStatut = "";
     let titre = "";
@@ -163,14 +249,22 @@ export async function envoyerEmailStatutCommande(
 
 // ============================================================
 // EMAIL D'ANNULATION DE COMMANDE
-// Envoye quand une commande est annulee
+// Type : transactionnel -> notif_commandes
 // ============================================================
 export async function envoyerEmailAnnulationCommande(
-    email: string, 
-    prenom: string, 
-    numeroCommande: string, 
-    motifAnnulation: string
+    email: string,
+    prenom: string,
+    numeroCommande: string,
+    motifAnnulation: string,
+    utilisateurId: number
 ) {
+    // RGPD : verifier le consentement avant envoi
+    const peutEnvoyer = await verifierPreferenceEmail(utilisateurId, "notif_commandes");
+    if (!peutEnvoyer) {
+        console.log(`[RGPD] Email d'annulation non envoye a ${email} (preference desactivee)`);
+        return;
+    }
+
     const contenuHTML = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #c0392b;">Annulation de votre commande</h1>
@@ -193,7 +287,8 @@ export async function envoyerEmailAnnulationCommande(
 
 // ============================================================
 // EMAIL DE FORMULAIRE DE CONTACT
-// Envoye a Julie/Jose quand un visiteur remplit le formulaire de contact
+// EXCEPTION RGPD : pas de verification de preference
+// Envoye vers Julie/Jose, pas vers un utilisateur du site
 // ============================================================
 export async function envoyerEmailContact(
     nom: string,
@@ -229,12 +324,20 @@ export async function envoyerEmailContact(
 
 // ============================================================
 // EMAIL DE PUBLICATION D'UN AVIS
-// Envoye quand un avis est modere et publie
+// Type : transactionnel (lie a une action de l'utilisateur) -> notif_commandes
 // ============================================================
 export async function envoyerEmailAvisPublie(
     email: string,
-    prenom: string
+    prenom: string,
+    utilisateurId: number
 ) {
+    // RGPD : verifier le consentement avant envoi
+    const peutEnvoyer = await verifierPreferenceEmail(utilisateurId, "notif_commandes");
+    if (!peutEnvoyer) {
+        console.log(`[RGPD] Email avis publie non envoye a ${email} (preference desactivee)`);
+        return;
+    }
+
     const contenuHTML = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #c0392b;">Votre avis a ete publie !</h1>
