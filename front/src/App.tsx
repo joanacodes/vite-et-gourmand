@@ -4,6 +4,8 @@ import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import Connexion from './pages/auth/Connexion'
 import Inscription from './pages/auth/Inscription'
+import MotDePasseOublie from './pages/auth/MotDePasseOublie'
+import ReinitialiserMotDePasse from './pages/auth/ReinitialiserMotDePasse'
 
 // Pages provisoires inline. On les extraira dans src/pages/ au fur et a mesure.
 
@@ -34,15 +36,6 @@ function Contact() {
     return (
         <main className="container py-5">
             <h1>Contact</h1>
-            <p>Page en cours de construction.</p>
-        </main>
-    )
-}
-
-function MotDePasseOublie() {
-    return (
-        <main className="container py-5">
-            <h1>Mot de passe oublié</h1>
             <p>Page en cours de construction.</p>
         </main>
     )
@@ -82,6 +75,7 @@ function App() {
                 <Route path="/connexion" element={<Connexion />} />
                 <Route path="/inscription" element={<Inscription />} />
                 <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+                <Route path="/reinitialiser-mot-de-passe" element={<ReinitialiserMotDePasse />} />
                 <Route path="*" element={<PageIntrouvable />} />
             </Routes>
 

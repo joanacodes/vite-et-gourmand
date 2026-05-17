@@ -1,0 +1,236 @@
+/* ============================================================
+   PAGE REINITIALISER MOT DE PASSE - Styles
+   ============================================================ */
+
+/* === COTE GAUCHE === */
+
+.reinit-gauche {
+    width: 100%;
+    max-width: 500px;
+    color: var(--color-blanc);
+    text-align: center;
+}
+
+.reinit-logo {
+    font-family: var(--font-titre);
+    font-style: italic;
+    font-size: var(--text-xl);
+    color: var(--color-blanc);
+    position: absolute;
+    top: var(--space-xl);
+    left: var(--space-xl);
+}
+
+/* Cercle avec icone bouclier */
+.reinit-icone-cercle {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    background-color: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--space-lg);
+    color: var(--color-blanc);
+}
+
+.reinit-titre {
+    font-size: 2.25rem;
+    color: var(--color-blanc);
+    margin-bottom: var(--space-md);
+    line-height: 1.2;
+}
+
+.reinit-soustitre {
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: var(--space-2xl);
+}
+
+/* Liste des conseils */
+.reinit-conseils {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.reinit-conseils li {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
+    align-items: flex-start;
+}
+
+.reinit-check {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-vert-succes);
+    color: var(--color-blanc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.reinit-conseil-titre {
+    font-weight: 600;
+    font-size: var(--text-base);
+    margin-bottom: 2px;
+    color: var(--color-blanc);
+}
+
+.reinit-conseil-desc {
+    font-size: var(--text-sm);
+    opacity: 0.85;
+    color: var(--color-blanc);
+}
+
+/* Indicateur progression (3 points, le dernier actif) */
+.reinit-progression {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    margin-top: var(--space-xl);
+}
+
+.reinit-point {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.4);
+    transition: all var(--transition-fast);
+}
+
+.reinit-point.active {
+    background-color: var(--color-blanc);
+    width: 24px;
+    border-radius: var(--radius-full);
+}
+
+.reinit-etape-libelle {
+    text-align: center;
+    margin-top: var(--space-md);
+    font-size: var(--text-sm);
+    opacity: 0.7;
+}
+
+
+/* === COTE DROIT === */
+
+.reinit-titre-form {
+    color: var(--color-bordeaux);
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-sm);
+}
+
+/* Alerte succes (lien verifie) */
+.reinit-alert-succes {
+    background-color: #E8F5E9;
+    border-left: 4px solid var(--color-vert-succes);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    color: var(--color-vert-succes);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+}
+
+.reinit-alert-succes strong {
+    display: block;
+    color: var(--color-anthracite);
+}
+
+/* Criteres validation */
+.reinit-criteres {
+    background-color: var(--color-creme-ivoire);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+}
+
+.reinit-criteres-titre {
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    font-size: var(--text-sm);
+}
+
+.reinit-criteres ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.reinit-criteres li {
+    font-size: var(--text-sm);
+    color: var(--color-gris-texte);
+    padding: 2px 0;
+    transition: color var(--transition-fast);
+}
+
+.reinit-criteres li.valide {
+    color: var(--color-vert-succes);
+    font-weight: 500;
+}
+
+.reinit-marque {
+    display: inline-block;
+    width: 20px;
+    font-weight: 700;
+}
+
+/* Conseil securite */
+.reinit-conseil-securite {
+    background-color: #FFF8E1;
+    border-left: 4px solid #F59E0B;
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    color: #92400E;
+    font-size: var(--text-sm);
+}
+
+.reinit-conseil-securite strong {
+    display: block;
+    color: var(--color-anthracite);
+    margin-bottom: 4px;
+}
+
+/* Separateur "ou" */
+.reinit-separateur {
+    text-align: center;
+    margin: var(--space-lg) 0;
+    position: relative;
+}
+
+.reinit-separateur::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background-color: var(--color-gris-clair);
+    z-index: 0;
+}
+
+.reinit-separateur span {
+    position: relative;
+    background-color: var(--color-blanc);
+    padding: 0 var(--space-md);
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    z-index: 1;
+}
+
+/* Lien retour */
+.reinit-lien-retour {
+    color: var(--color-bordeaux);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.reinit-lien-retour:hover {
+    text-decoration: underline;
+}

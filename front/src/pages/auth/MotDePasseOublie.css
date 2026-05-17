@@ -1,0 +1,176 @@
+/* ============================================================
+   PAGE MOT DE PASSE OUBLIE - Styles
+   ============================================================ */
+
+/* === COTE GAUCHE === */
+
+.mdp-oublie-gauche {
+    width: 100%;
+    max-width: 500px;
+    color: var(--color-blanc);
+    text-align: center;
+}
+
+.mdp-oublie-logo {
+    font-family: var(--font-titre);
+    font-style: italic;
+    font-size: var(--text-xl);
+    color: var(--color-blanc);
+    position: absolute;
+    top: var(--space-xl);
+    left: var(--space-xl);
+}
+
+/* Cercle avec icone cle */
+.mdp-oublie-icone-cercle {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    background-color: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--space-lg);
+    color: var(--color-blanc);
+}
+
+.mdp-oublie-titre {
+    font-size: 2.25rem;
+    color: var(--color-blanc);
+    margin-bottom: var(--space-md);
+    line-height: 1.2;
+}
+
+.mdp-oublie-soustitre {
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: var(--space-2xl);
+}
+
+/* Etapes 1-2-3 */
+.mdp-oublie-etapes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.mdp-oublie-etapes li {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
+    align-items: flex-start;
+}
+
+.mdp-oublie-numero {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-blanc);
+    color: var(--color-bordeaux);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: var(--font-corps);
+    font-style: normal;
+}
+
+.mdp-oublie-etape-titre {
+    font-weight: 600;
+    font-size: var(--text-base);
+    margin-bottom: 2px;
+}
+
+.mdp-oublie-etape-desc {
+    font-size: var(--text-sm);
+    opacity: 0.85;
+}
+
+/* Indicateur de progression (3 points) */
+.mdp-oublie-progression {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    margin-top: var(--space-xl);
+}
+
+.mdp-oublie-point {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.4);
+    transition: all var(--transition-fast);
+}
+
+.mdp-oublie-point.active {
+    background-color: var(--color-blanc);
+    width: 24px;
+    border-radius: var(--radius-full);
+}
+
+
+/* === COTE DROIT === */
+
+.mdp-oublie-titre-form {
+    color: var(--color-bordeaux);
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-sm);
+}
+
+/* Bloc informations importantes */
+.mdp-oublie-info {
+    background-color: var(--color-creme-ivoire);
+    border-left: 4px solid var(--color-bordeaux);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    color: var(--color-anthracite);
+    font-size: var(--text-sm);
+}
+
+.mdp-oublie-info-liste {
+    padding-left: 1.25rem;
+}
+
+.mdp-oublie-info-liste li {
+    padding: 2px 0;
+}
+
+/* Icone de succes (cercle vert avec check) */
+.mdp-oublie-icone-succes {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    background-color: #E8F5E9;
+    color: var(--color-vert-succes);
+}
+
+/* Separateur "ou" */
+.mdp-oublie-separateur {
+    text-align: center;
+    margin: var(--space-lg) 0;
+    position: relative;
+}
+
+.mdp-oublie-separateur::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background-color: var(--color-gris-clair);
+    z-index: 0;
+}
+
+.mdp-oublie-separateur span {
+    position: relative;
+    background-color: var(--color-blanc);
+    padding: 0 var(--space-md);
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    z-index: 1;
+}
