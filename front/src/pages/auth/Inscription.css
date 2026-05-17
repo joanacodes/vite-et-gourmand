@@ -1,0 +1,206 @@
+/* ============================================================
+   PAGE INSCRIPTION - Styles
+   ============================================================ */
+
+/* === COTE GAUCHE - Features === */
+
+.inscription-features {
+    width: 100%;
+    max-width: 500px;
+    text-align: left;
+    color: var(--color-blanc);
+}
+
+.inscription-logo-gauche {
+    font-family: var(--font-titre);
+    font-style: italic;
+    font-size: var(--text-xl);
+    color: var(--color-blanc);
+    position: absolute;
+    top: var(--space-xl);
+    left: var(--space-xl);
+}
+
+.inscription-titre-gauche {
+    font-size: 2.5rem;
+    color: var(--color-blanc);
+    margin-top: var(--space-2xl);
+    margin-bottom: var(--space-md);
+    line-height: 1.2;
+}
+
+.inscription-soustitre-gauche {
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: var(--space-xl);
+}
+
+/* Liste des features */
+.inscription-liste-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-lg) 0;
+}
+
+.inscription-feature {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-normal);
+    opacity: 0.5;
+}
+
+.inscription-feature.active {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Icone dans un cercle */
+.inscription-feature-icone {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background-color: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--color-blanc);
+}
+
+.inscription-feature-contenu {
+    flex: 1;
+}
+
+.inscription-feature-titre {
+    font-weight: 600;
+    font-size: var(--text-base);
+    margin-bottom: 2px;
+}
+
+.inscription-feature-desc {
+    font-size: var(--text-sm);
+    opacity: 0.85;
+}
+
+/* Pagination puces */
+.inscription-pagination {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+}
+
+.inscription-puce {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.4);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    padding: 0;
+}
+
+.inscription-puce.active {
+    background-color: var(--color-blanc);
+    width: 24px;
+    border-radius: var(--radius-full);
+}
+
+
+/* === COTE DROIT - Formulaire === */
+
+.inscription-carte {
+    max-width: 560px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.inscription-titre {
+    font-size: var(--text-2xl);
+    color: var(--color-bordeaux);
+    margin-bottom: var(--space-xs);
+}
+
+/* Labels de section ("INFORMATIONS PERSONNELLES" etc.) */
+.inscription-section-label {
+    display: flex;
+    align-items: center;
+    margin: var(--space-lg) 0 var(--space-md);
+    gap: var(--space-md);
+}
+
+.inscription-section-label::before,
+.inscription-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-gris-clair);
+}
+
+.inscription-section-label span {
+    font-size: var(--text-xs);
+    letter-spacing: 2px;
+    color: var(--color-gris-texte);
+    text-transform: uppercase;
+}
+
+/* Criteres de validation du mot de passe */
+.inscription-criteres {
+    background-color: var(--color-creme-ivoire);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+}
+
+.inscription-criteres-titre {
+    font-weight: 500;
+    margin-bottom: var(--space-sm);
+    font-size: var(--text-sm);
+}
+
+.inscription-criteres ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.inscription-criteres li {
+    font-size: var(--text-sm);
+    color: var(--color-gris-texte);
+    padding: 2px 0;
+    transition: color var(--transition-fast);
+}
+
+.inscription-criteres li.valide {
+    color: var(--color-vert-succes);
+    font-weight: 500;
+}
+
+.inscription-critere-marque {
+    display: inline-block;
+    width: 20px;
+    font-weight: 700;
+}
+
+/* Bouton submit */
+.inscription-bouton-submit {
+    font-size: var(--text-base);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+}
+
+.inscription-bouton-submit:disabled {
+    opacity: 0.5;
+}
+
+/* Lien vers connexion */
+.inscription-lien-connexion {
+    color: var(--color-bordeaux);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.inscription-lien-connexion:hover {
+    text-decoration: underline;
+}

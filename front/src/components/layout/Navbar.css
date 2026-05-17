@@ -1,0 +1,82 @@
+/* ============================================================
+   NAVBAR - Styles
+   ============================================================ */
+
+.navbar-principale {
+    background-color: var(--color-bordeaux);
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+}
+
+/* Logo "Vite & Gourmand" en Instrument Serif italic */
+.navbar-logo {
+    font-family: var(--font-titre);
+    font-style: italic;
+    font-size: var(--text-xl);
+    color: var(--color-blanc) !important;
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+}
+
+.navbar-logo:hover {
+    opacity: 0.85;
+    color: var(--color-blanc) !important;
+}
+
+/* Liens de la navbar */
+.navbar-lien {
+    color: var(--color-blanc) !important;
+    text-decoration: none;
+    font-size: var(--text-base);
+    font-weight: 400;
+    padding: var(--space-xs) var(--space-sm);
+    transition: opacity var(--transition-fast);
+    position: relative;
+}
+
+.navbar-lien:hover {
+    opacity: 0.85;
+    color: var(--color-blanc) !important;
+}
+
+/* Lien actif : trait sous le texte */
+.navbar-lien.active {
+    font-weight: 500;
+}
+
+.navbar-lien.active::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: var(--space-sm);
+    right: var(--space-sm);
+    height: 2px;
+    background-color: var(--color-blanc);
+}
+
+/* Bouton "Mon compte" : outline blanc */
+.navbar-bouton-compte {
+    background: transparent;
+    border: 1px solid var(--color-blanc);
+    color: var(--color-blanc);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.navbar-bouton-compte:hover {
+    background-color: var(--color-blanc);
+    color: var(--color-bordeaux);
+}
+
+/* Responsive : menu plus compact sur mobile */
+@media (max-width: 768px) {
+    .navbar-logo {
+        font-size: var(--text-lg);
+    }
+}

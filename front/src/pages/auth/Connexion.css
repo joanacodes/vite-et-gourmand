@@ -1,0 +1,184 @@
+/* ============================================================
+   PAGE CONNEXION - Styles
+   ============================================================ */
+
+/* === COTE GAUCHE - Temoignages === */
+
+.connexion-temoignage {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Logo en haut de la zone gauche */
+.connexion-logo-gauche {
+    font-family: var(--font-titre);
+    font-style: italic;
+    font-size: var(--text-xl);
+    color: var(--color-blanc);
+    position: absolute;
+    top: var(--space-xl);
+    left: var(--space-xl);
+}
+
+/* Bloc citation */
+.connexion-citation {
+    margin: var(--space-2xl) 0;
+}
+
+.connexion-guillemets-haut,
+.connexion-guillemets-bas {
+    font-family: var(--font-titre);
+    font-style: italic;
+    font-size: 3rem;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.connexion-guillemets-bas {
+    text-align: right;
+}
+
+.connexion-texte-citation {
+    font-family: var(--font-titre);
+    font-style: italic;
+    font-size: var(--text-lg);
+    line-height: 1.6;
+    color: var(--color-blanc);
+    margin: var(--space-md) 0;
+}
+
+/* Auteur */
+.connexion-auteur {
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    padding-top: var(--space-lg);
+    margin-top: var(--space-lg);
+    width: 80%;
+}
+
+.connexion-nom {
+    font-weight: 600;
+    font-size: var(--text-md);
+}
+
+.connexion-evenement {
+    font-size: var(--text-sm);
+    opacity: 0.85;
+    margin-top: var(--space-xs);
+}
+
+/* Puces de pagination des temoignages */
+.connexion-pagination {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-2xl);
+}
+
+.connexion-puce {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.4);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.connexion-puce.active {
+    background-color: var(--color-blanc);
+    width: 24px;
+    border-radius: var(--radius-full);
+}
+
+
+/* === COTE DROIT - Formulaire === */
+
+.connexion-suptitre {
+    font-size: var(--text-xs);
+    letter-spacing: 2px;
+    color: var(--color-gris-texte);
+    text-transform: uppercase;
+    margin-bottom: var(--space-sm);
+}
+
+.connexion-titre {
+    font-size: var(--text-3xl);
+    color: var(--color-anthracite);
+    margin-bottom: var(--space-sm);
+}
+
+.connexion-separateur {
+    margin: var(--space-lg) 0 var(--space-sm) 0;
+    opacity: 0.3;
+}
+
+.connexion-section-label {
+    text-align: center;
+    font-size: var(--text-xs);
+    letter-spacing: 2px;
+    color: var(--color-gris-texte);
+    text-transform: uppercase;
+    margin-bottom: var(--space-lg);
+    margin-top: calc(-1 * var(--space-md));
+    background-color: var(--color-blanc);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 var(--space-md);
+}
+
+/* Lien mot de passe oublie */
+.connexion-lien-mdp {
+    color: var(--color-bleu-nuit);
+    text-decoration: none;
+    font-size: var(--text-sm);
+}
+
+.connexion-lien-mdp:hover {
+    text-decoration: underline;
+    color: var(--color-bleu-nuit-hover);
+}
+
+/* Bouton submit */
+.connexion-bouton-submit {
+    font-size: var(--text-base);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+}
+
+/* Lien vers inscription */
+.connexion-lien-inscription {
+    color: var(--color-bordeaux);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.connexion-lien-inscription:hover {
+    text-decoration: underline;
+}
+
+/* Encart securite */
+.connexion-securite {
+    background-color: #E8F5E9;
+    border-left: 3px solid var(--color-vert-succes);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    color: var(--color-vert-succes);
+    font-size: var(--text-sm);
+}
+
+.connexion-securite svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.connexion-securite strong {
+    color: var(--color-anthracite);
+    display: block;
+}

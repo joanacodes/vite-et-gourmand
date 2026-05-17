@@ -1,0 +1,93 @@
+/* ============================================================
+   FOOTER - Styles
+   ============================================================ */
+
+.footer-principal {
+    background-color: var(--color-bleu-nuit);
+    color: var(--color-blanc);
+    margin-top: auto; /* push au bas de la page */
+}
+
+/* Titre "Vite & Gourmand" en Instrument Serif */
+.footer-titre {
+    font-family: var(--font-titre);
+    font-style: italic;
+    font-size: var(--text-xl);
+    color: var(--color-blanc);
+    margin: 0;
+}
+
+.footer-slogan {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: var(--space-xs);
+}
+
+.footer-adresse {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+}
+
+/* Titres de section (HORAIRES, LIENS UTILES, etc.) */
+.footer-section-titre {
+    font-family: var(--font-corps);  /* Pas en italique pour ces titres */
+    font-style: normal;
+    font-weight: 600;
+    font-size: var(--text-sm);
+    letter-spacing: 1px;
+    color: var(--color-blanc);
+    margin-bottom: var(--space-md);
+    text-transform: uppercase;
+}
+
+/* Listes du footer */
+.footer-liste {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-liste li {
+    padding: var(--space-xs) 0;
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Liens */
+.footer-lien {
+    color: rgba(255, 255, 255, 0.85) !important;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.footer-lien:hover {
+    color: var(--color-blanc) !important;
+}
+
+/* Icones reseaux sociaux */
+.footer-rs-icone {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-blanc) !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.footer-rs-icone:hover {
+    background: var(--color-bordeaux);
+    color: var(--color-blanc) !important;
+    transform: translateY(-2px);
+}
+
+/* Copyright en bas */
+.footer-copyright {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.7);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}

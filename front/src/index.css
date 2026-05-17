@@ -1,0 +1,61 @@
+/* ============================================================
+   STYLES GLOBAUX - Reset et base
+   ============================================================ */
+
+/* Reset minimal (Bootstrap fait deja le gros du travail) */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: var(--font-corps);
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--color-anthracite);
+    background-color: var(--color-creme-ivoire);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Application automatique de la police titre sur les h1-h6 */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-titre);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--color-anthracite);
+    margin-bottom: var(--space-md);
+}
+
+h1 { font-size: var(--text-3xl); }
+h2 { font-size: var(--text-2xl); }
+h3 { font-size: var(--text-xl); }
+h4 { font-size: var(--text-lg); }
+h5 { font-size: var(--text-md); }
+h6 { font-size: var(--text-base); }
+
+/* Le contenu principal prend tout l'espace dispo (pousse le footer en bas) */
+main {
+    flex: 1;
+}
+
+/* Accessibilite : focus visible pour la navigation clavier */
+*:focus-visible {
+    outline: 2px solid var(--color-bordeaux);
+    outline-offset: 2px;
+}
+
+/* Selection texte */
+::selection {
+    background-color: var(--color-bordeaux);
+    color: var(--color-blanc);
+}

@@ -1,0 +1,169 @@
+/* ============================================================
+   CHARTE GRAPHIQUE - VITE & GOURMAND
+   Tokens design : couleurs, typo, espacements, ombres
+   Version 1.0 - 11 mai 2026
+   ============================================================ */
+
+:root {
+    /* ===== COULEURS PRINCIPALES ===== */
+    --color-bordeaux:        #7B2D26;  /* Logo, header, CTA */
+    --color-bordeaux-hover:  #5C201B;  /* Hover des CTA bordeaux */
+    --color-vert-sauge:      #3E5C4A;  /* Boutons commander */
+    --color-vert-sauge-hover:#2F4537;
+    --color-bleu-nuit:       #1F3A5F;  /* Liens, accents */
+    --color-bleu-nuit-hover: #152741;
+    
+    /* ===== FONDS ===== */
+    --color-creme-ivoire:    #FAF3E7;  /* Fond principal */
+    --color-blanc:           #FFFFFF;  /* Cards, formulaires */
+    
+    /* ===== TEXTES ===== */
+    --color-anthracite:      #2C2C2C;  /* Texte principal */
+    --color-gris-texte:      #6B6B6B;  /* Texte secondaire */
+    --color-gris-clair:      #E8E8E8;  /* Bordures, separateurs */
+    
+    /* ===== ETATS ===== */
+    --color-vert-succes:     #28A745;  /* Validations */
+    --color-rouge-erreur:    #DC3545;  /* Erreurs, annulations */
+    
+    /* ===== STATUTS DE COMMANDE (fond + texte) ===== */
+    --statut-attente-fond:        #DBEAFE;
+    --statut-attente-texte:       #1D4ED8;
+    --statut-accepte-fond:        #86EFAC;
+    --statut-accepte-texte:       #15803D;
+    --statut-preparation-fond:    #FFF4E6;
+    --statut-preparation-texte:   #E07A5F;
+    --statut-livraison-fond:      #93C5FD;
+    --statut-livraison-texte:     #1D4ED8;
+    --statut-livre-fond:          #22C55E;
+    --statut-livre-texte:         #FFFFFF;
+    --statut-retour-fond:         #FCE8EF;
+    --statut-retour-texte:        #5C1032;
+    --statut-terminee-fond:       #F3F4F6;
+    --statut-terminee-texte:      #111827;
+    --statut-annulee-fond:        #FFE8E8;
+    --statut-annulee-texte:       #D4183D;
+    
+    /* ===== TYPOGRAPHIE ===== */
+    --font-titre:            'Instrument Serif', Georgia, serif;
+    --font-corps:            'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    
+    /* Echelle typographique (en rem) */
+    --text-xs:               0.75rem;   /* metadonnees, captions */
+    --text-sm:               0.875rem;  /* texte secondaire */
+    --text-base:             1rem;      /* corps standard */
+    --text-md:               1.125rem;  /* titre de carte */
+    --text-lg:               1.25rem;   /* titre de section */
+    --text-xl:               1.5rem;    /* titre de page */
+    --text-2xl:              2rem;      /* gros titre */
+    --text-3xl:              2.5rem;    /* hero */
+    --text-hero:             3.5rem;    /* hero ultra grand */
+    
+    /* ===== BORDER RADIUS ===== */
+    --radius-sm:             4px;       /* badges, tags */
+    --radius-md:             8px;       /* boutons, inputs */
+    --radius-lg:             12px;      /* cards */
+    --radius-xl:             16px;      /* modales */
+    --radius-full:           9999px;    /* avatars */
+    
+    /* ===== OMBRES ===== */
+    --shadow-sm:             0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md:             0 4px 6px rgba(0, 0, 0, 0.10);
+    --shadow-lg:             0 10px 15px rgba(0, 0, 0, 0.10);
+    --shadow-xl:             0 20px 25px rgba(0, 0, 0, 0.15);
+    
+    /* ===== ESPACEMENTS ===== */
+    --space-xs:              4px;
+    --space-sm:              8px;
+    --space-md:              16px;
+    --space-lg:              24px;
+    --space-xl:              32px;
+    --space-2xl:             48px;
+    --space-3xl:             64px;
+    
+    /* ===== TRANSITIONS ===== */
+    --transition-fast:       150ms ease-in-out;
+    --transition-normal:     250ms ease-in-out;
+    --transition-slow:       400ms ease-in-out;
+}
+
+
+/* ============================================================
+   UTILITAIRES PERSONNALISES (override Bootstrap)
+   ============================================================ */
+
+/* Bouton primary -> bordeaux */
+.btn-primary {
+    background-color: var(--color-bordeaux);
+    border-color: var(--color-bordeaux);
+    font-weight: 500;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--color-bordeaux-hover) !important;
+    border-color: var(--color-bordeaux-hover) !important;
+}
+
+/* Bouton outline bordeaux */
+.btn-outline-primary {
+    color: var(--color-bordeaux);
+    border-color: var(--color-bordeaux);
+    font-weight: 500;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--color-bordeaux) !important;
+    border-color: var(--color-bordeaux) !important;
+    color: var(--color-blanc) !important;
+}
+
+/* Bouton "commander" -> vert sauge */
+.btn-success {
+    background-color: var(--color-vert-sauge);
+    border-color: var(--color-vert-sauge);
+}
+
+.btn-success:hover,
+.btn-success:focus {
+    background-color: var(--color-vert-sauge-hover) !important;
+    border-color: var(--color-vert-sauge-hover) !important;
+}
+
+/* Liens accent bleu nuit */
+a {
+    color: var(--color-bordeaux);
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--color-bordeaux-hover);
+}
+
+
+/* ============================================================
+   CLASSES UTILITAIRES SPECIFIQUES
+   ============================================================ */
+
+/* Titres en Instrument Serif italic */
+.titre-serif {
+    font-family: var(--font-titre);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+/* Fond creme global */
+.fond-creme {
+    background-color: var(--color-creme-ivoire);
+}
+
+/* Carte standard */
+.carte-standard {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-xl);
+}
