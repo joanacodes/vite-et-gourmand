@@ -6,6 +6,7 @@ import Connexion from './pages/auth/Connexion'
 import Inscription from './pages/auth/Inscription'
 import MotDePasseOublie from './pages/auth/MotDePasseOublie'
 import ReinitialiserMotDePasse from './pages/auth/ReinitialiserMotDePasse'
+import Menus from './pages/Menus'
 
 // Pages provisoires inline. On les extraira dans src/pages/ au fur et a mesure.
 
@@ -23,10 +24,10 @@ function Accueil() {
     )
 }
 
-function Menus() {
+function DetailMenu() {
     return (
         <main className="container py-5">
-            <h1>Nos menus</h1>
+            <h1>Detail du menu</h1>
             <p>Page en cours de construction.</p>
         </main>
     )
@@ -53,7 +54,6 @@ function PageIntrouvable() {
 function App() {
     const { chargement } = useAuth()
 
-    // Pendant le chargement initial de la session, on affiche un spinner
     if (chargement) {
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
@@ -71,6 +71,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Accueil />} />
                 <Route path="/menus" element={<Menus />} />
+                <Route path="/menu/:id" element={<DetailMenu />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/connexion" element={<Connexion />} />
                 <Route path="/inscription" element={<Inscription />} />

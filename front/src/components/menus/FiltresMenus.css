@@ -1,0 +1,149 @@
+/* ============================================================
+   FILTRES MENUS - Styles
+   ============================================================ */
+
+.filtres-menus {
+    background-color: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-xl);
+}
+
+/* === LIGNE 1 : Recherche + dropdowns === */
+
+.filtres-menus-ligne {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    align-items: center;
+}
+
+/* Champ de recherche */
+.filtres-menus-recherche {
+    position: relative;
+    flex: 1 1 280px;
+    min-width: 240px;
+}
+
+.filtres-menus-recherche svg {
+    position: absolute;
+    left: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-gris-texte);
+    pointer-events: none;
+}
+
+.filtres-menus-recherche input {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md) var(--space-sm) calc(var(--space-md) + 24px);
+    border: 1px solid var(--color-gris-clair);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    background-color: var(--color-blanc);
+    color: var(--color-anthracite);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.filtres-menus-recherche input:focus {
+    outline: none;
+    border-color: var(--color-bordeaux);
+    box-shadow: 0 0 0 3px rgba(123, 45, 38, 0.1);
+}
+
+/* Selects */
+.filtres-menus-select {
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-gris-clair);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    background-color: var(--color-blanc);
+    color: var(--color-anthracite);
+    cursor: pointer;
+    min-width: 160px;
+    transition: border-color var(--transition-fast);
+}
+
+.filtres-menus-select:hover {
+    border-color: var(--color-bordeaux);
+}
+
+.filtres-menus-select:focus {
+    outline: none;
+    border-color: var(--color-bordeaux);
+    box-shadow: 0 0 0 3px rgba(123, 45, 38, 0.1);
+}
+
+/* Bouton reinitialiser */
+.filtres-menus-reinit {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-gris-clair);
+    border-radius: var(--radius-md);
+    background-color: var(--color-blanc);
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.filtres-menus-reinit:hover {
+    border-color: var(--color-bordeaux);
+    color: var(--color-bordeaux);
+}
+
+/* === LIGNE 2 : Chips de themes === */
+
+.filtres-menus-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-gris-clair);
+}
+
+.filtres-menus-chip {
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-gris-clair);
+    border-radius: var(--radius-full);
+    background-color: var(--color-blanc);
+    color: var(--color-anthracite);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.filtres-menus-chip:hover {
+    border-color: var(--color-bordeaux);
+    color: var(--color-bordeaux);
+}
+
+.filtres-menus-chip.active {
+    background-color: var(--color-bordeaux);
+    border-color: var(--color-bordeaux);
+    color: var(--color-blanc);
+}
+
+/* === Responsive === */
+
+@media (max-width: 768px) {
+    .filtres-menus-ligne {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtres-menus-recherche,
+    .filtres-menus-select,
+    .filtres-menus-reinit {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .filtres-menus-reinit {
+        justify-content: center;
+    }
+}
