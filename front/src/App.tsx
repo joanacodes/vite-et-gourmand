@@ -7,8 +7,9 @@ import Inscription from './pages/auth/Inscription'
 import MotDePasseOublie from './pages/auth/MotDePasseOublie'
 import ReinitialiserMotDePasse from './pages/auth/ReinitialiserMotDePasse'
 import Menus from './pages/Menus'
+import DetailMenu from './pages/DetailMenu'
 
-// Pages provisoires inline. On les extraira dans src/pages/ au fur et a mesure.
+// Pages provisoires inline (a extraire au fur et a mesure)
 
 function Accueil() {
     return (
@@ -20,15 +21,6 @@ function Accueil() {
             <p className="text-center text-muted">
                 Le site est en cours de construction. 🍽️
             </p>
-        </main>
-    )
-}
-
-function DetailMenu() {
-    return (
-        <main className="container py-5">
-            <h1>Detail du menu</h1>
-            <p>Page en cours de construction.</p>
         </main>
     )
 }
