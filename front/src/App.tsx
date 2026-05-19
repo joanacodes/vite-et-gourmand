@@ -8,22 +8,9 @@ import MotDePasseOublie from './pages/auth/MotDePasseOublie'
 import ReinitialiserMotDePasse from './pages/auth/ReinitialiserMotDePasse'
 import Menus from './pages/Menus'
 import DetailMenu from './pages/DetailMenu'
+import Accueil from './pages/Accueil'
 
 // Pages provisoires inline (a extraire au fur et a mesure)
-
-function Accueil() {
-    return (
-        <main className="container py-5">
-            <h1 className="text-center mb-4">Bienvenue chez Vite & Gourmand</h1>
-            <p className="text-center lead">
-                Une cuisine d'exception, livrée chez vous.
-            </p>
-            <p className="text-center text-muted">
-                Le site est en cours de construction. 🍽️
-            </p>
-        </main>
-    )
-}
 
 function Contact() {
     return (
