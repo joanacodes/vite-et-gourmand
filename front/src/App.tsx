@@ -16,6 +16,7 @@ import MotDePasseOublie from './pages/auth/MotDePasseOublie'
 import ReinitialiserMotDePasse from './pages/auth/ReinitialiserMotDePasse'
 
 import PagePlaceholder from './pages/pro/PagePlaceholder'
+import DashboardAdmin from './pages/pro/admin/Dashboard'
 
 function PageIntrouvable() {
     return (
@@ -82,7 +83,7 @@ function App() {
                     </RouteProtegee>
                 }
             >
-                <Route index element={<PagePlaceholder titre="Tableau de bord" description="Vue globale de l'activité" />} />
+                <Route index element={<DashboardAdmin />} />
                 <Route path="menus" element={<PagePlaceholder titre="Gestion des menus" />} />
                 <Route path="menus/nouveau" element={<PagePlaceholder titre="Créer un menu" />} />
                 <Route path="menus/:id" element={<PagePlaceholder titre="Modifier un menu" />} />

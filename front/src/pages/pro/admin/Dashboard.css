@@ -1,0 +1,295 @@
+/* Tableau de bord admin */
+
+.dashboard {
+    max-width: 1400px;
+}
+
+.dashboard-titre {
+    font-size: 2rem;
+    color: var(--color-bordeaux);
+    margin-bottom: var(--space-xl);
+}
+
+/* ===== KPIs ===== */
+.dashboard-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.kpi-carte {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-lg);
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+}
+
+.kpi-carte-icone {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.kpi-carte-icone--bordeaux {
+    background-color: rgba(123, 45, 38, 0.1);
+    color: var(--color-bordeaux);
+}
+.kpi-carte-icone--sauge {
+    background-color: rgba(62, 92, 74, 0.1);
+    color: var(--color-vert-sauge);
+}
+.kpi-carte-icone--bleu {
+    background-color: rgba(31, 58, 95, 0.1);
+    color: var(--color-bleu-nuit);
+}
+.kpi-carte-icone--or {
+    background-color: rgba(245, 200, 74, 0.15);
+    color: #B7791F;
+}
+
+.kpi-carte-corps {
+    flex: 1;
+    min-width: 0;
+}
+
+.kpi-carte-valeur {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-anthracite);
+    line-height: 1.1;
+}
+
+.kpi-carte-label {
+    font-size: var(--text-sm);
+    color: var(--color-gris-texte);
+    margin-top: 4px;
+}
+
+.kpi-carte-variation {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-top: 6px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+.kpi-carte-variation--positive {
+    color: var(--color-vert-succes);
+}
+
+.kpi-carte-variation--negative {
+    color: var(--color-rouge-erreur);
+}
+
+.kpi-carte-variation-suffixe {
+    color: var(--color-gris-texte);
+    font-weight: 400;
+}
+
+/* ===== GRAPHIQUES ===== */
+.dashboard-graphiques {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.dashboard-carte {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-lg);
+}
+
+.dashboard-carte-entete {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.dashboard-carte-titre {
+    font-size: 1.25rem;
+    color: var(--color-bordeaux);
+    margin: 0;
+}
+
+.dashboard-select {
+    max-width: 200px;
+    border-radius: var(--radius-md);
+}
+
+/* ===== SECTIONS BAS DE PAGE ===== */
+.dashboard-section {
+    margin-bottom: var(--space-xl);
+}
+
+.dashboard-filtres {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* ===== TABLE ===== */
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dashboard-table thead th {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-gris-clair);
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.dashboard-table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.dashboard-table tbody tr:hover {
+    background-color: var(--color-creme-ivoire);
+}
+
+.dashboard-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-gris-clair);
+    color: var(--color-anthracite);
+    font-size: var(--text-sm);
+    vertical-align: middle;
+}
+
+.dashboard-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dashboard-table-numero {
+    font-family: 'Courier New', monospace;
+    color: var(--color-gris-texte);
+    font-size: 0.85rem;
+}
+
+.dashboard-table-lien {
+    color: var(--color-bordeaux);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.dashboard-table-lien:hover {
+    text-decoration: underline;
+}
+
+.dashboard-table-action {
+    background: transparent;
+    border: none;
+    color: var(--color-gris-texte);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+}
+
+.dashboard-table-action:hover {
+    background-color: var(--color-gris-clair);
+    color: var(--color-anthracite);
+}
+
+/* ===== BADGES STATUT ===== */
+.dashboard-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.badge-en-attente {
+    background-color: #DBEAFE;
+    color: #1D4ED8;
+}
+.badge-accepte {
+    background-color: #86EFAC;
+    color: #15803D;
+}
+.badge-en-preparation {
+    background-color: #FFF4E6;
+    color: #E07A5F;
+}
+.badge-en-livraison {
+    background-color: #93C5FD;
+    color: #1D4ED8;
+}
+.badge-livre {
+    background-color: #22C55E;
+    color: var(--color-blanc);
+}
+.badge-attente-retour {
+    background-color: #FCE8EF;
+    color: #5C1032;
+}
+.badge-terminee {
+    background-color: #F3F4F6;
+    color: #111827;
+}
+.badge-annulee {
+    background-color: #FFE8E8;
+    color: #D4183D;
+}
+
+/* ===== ACTIONS LIENS ===== */
+.dashboard-action-rouge {
+    color: var(--color-rouge-erreur);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: 500;
+}
+.dashboard-action-rouge:hover {
+    text-decoration: underline;
+}
+
+.dashboard-action-verte {
+    color: var(--color-vert-succes);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: 500;
+}
+.dashboard-action-verte:hover {
+    text-decoration: underline;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1199px) {
+    .dashboard-kpis {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .dashboard-graphiques {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 575px) {
+    .dashboard-titre {
+        font-size: 1.5rem;
+    }
+    .dashboard-kpis {
+        grid-template-columns: 1fr;
+    }
+    .kpi-carte-valeur {
+        font-size: 1.5rem;
+    }
+}
