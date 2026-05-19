@@ -222,3 +222,140 @@ export async function activiteRecente(req: Request, res: Response) {
     res.status(500).json({ erreur: "Erreur serveur" });
   }
 }
+
+// ============================================================
+// COMMANDES PAR MENU (MongoDB)
+// GET /api/stats/commandes-par-menu?periode=annee|mois|semaine|tout
+// Compte le nombre de commandes pour chaque menu en agregant
+// les evenements 'creation_commande' stockes dans MongoDB.
+// Exigence enonce p.9 : "Les donnees doivent venir d'une base
+// de donnees non relationnelle"
+// ============================================================
+export async function commandesParMenu(req: Request, res: Response) {
+  try {
+    const periode = (req.query.periode as string) || "annee";
+
+    // Filtre temporel
+    const maintenant = new Date();
+    let dateDebut: Date | null = null;
+    if (periode === "semaine") {
+      dateDebut = new Date(maintenant.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (periode === "mois") {
+      dateDebut = new Date(maintenant.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (periode === "annee") {
+      dateDebut = new Date(maintenant.getTime() - 365 * 24 * 60 * 60 * 1000);
+    }
+    // periode "tout" -> pas de filtre date
+
+    const filtreMongo: any = { type: "creation_commande" };
+    if (dateDebut) {
+      filtreMongo.date = { $gte: dateDebut };
+    }
+
+    // Agregation MongoDB : groupBy menuId, count
+    const agregation = await Evenement.aggregate([
+      { $match: filtreMongo },
+      {
+        $group: {
+          _id: "$menuId",
+          nombreCommandes: { $sum: 1 },
+        },
+      },
+      { $sort: { nombreCommandes: -1 } },
+    ]);
+
+    const menuIds = agregation
+      .map((a) => a._id)
+      .filter((id) => id !== null && id !== undefined);
+
+    if (menuIds.length === 0) {
+      return res.json({ menus: [], periode });
+    }
+
+    // Recup des titres depuis Postgres pour affichage
+    const resultatMenus = await pool.query(
+      `SELECT menu_id, titre FROM menu WHERE menu_id = ANY($1)`,
+      [menuIds],
+    );
+
+    const menusAvecCommandes = agregation.map((a) => {
+      const menu = resultatMenus.rows.find((m) => m.menu_id === a._id);
+      return {
+        menuId: a._id,
+        titre: menu ? menu.titre : "Menu introuvable",
+        nombreCommandes: a.nombreCommandes,
+      };
+    });
+
+    res.json({ menus: menusAvecCommandes, periode });
+  } catch (erreur) {
+    console.error("Erreur commandes par menu :", erreur);
+    res.status(500).json({ erreur: "Erreur serveur" });
+  }
+}
+
+// ============================================================
+// CHIFFRE D'AFFAIRES PAR MENU (PostgreSQL)
+// GET /api/stats/ca-par-menu?periode=annee|mois|semaine|tout&menuId=N
+// CA par menu avec filtres durée (et menu specifique optionnel).
+// On utilise Postgres pour les chiffres financiers (precis).
+// ============================================================
+export async function caParMenu(req: Request, res: Response) {
+  try {
+    const periode = (req.query.periode as string) || "annee";
+    const menuId = req.query.menuId
+      ? parseInt(req.query.menuId as string, 10)
+      : null;
+
+    // On construit la clause WHERE en accumulant les filtres
+    const clauses: string[] = [
+      "statut IN ('accepte', 'en_preparation', 'en_cours_livraison', 'livre', 'attente_retour_materiel', 'terminee')",
+    ];
+    const params: any[] = [];
+
+    if (periode === "semaine") {
+      clauses.push("date_commande >= NOW() - INTERVAL '7 days'");
+    } else if (periode === "mois") {
+      clauses.push("date_commande >= NOW() - INTERVAL '30 days'");
+    } else if (periode === "annee") {
+      clauses.push("date_commande >= NOW() - INTERVAL '365 days'");
+    }
+
+    if (menuId !== null && !isNaN(menuId)) {
+      params.push(menuId);
+      clauses.push(`c.menu_id = $${params.length}`);
+    }
+
+    const requete = `
+      SELECT 
+        m.menu_id, 
+        m.titre,
+        COUNT(c.numero_commande) AS nombre_commandes,
+        COALESCE(SUM(c.prix_menu + c.prix_livraison), 0) AS ca
+      FROM menu m
+      LEFT JOIN commande c 
+        ON c.menu_id = m.menu_id 
+        AND ${clauses.join(" AND ")}
+      ${menuId !== null && !isNaN(menuId) ? `WHERE m.menu_id = $${params.length}` : ""}
+      GROUP BY m.menu_id, m.titre
+      ORDER BY ca DESC
+    `;
+
+    const resultat = await pool.query(requete, params);
+
+    const menus = resultat.rows.map((ligne) => ({
+      menuId: ligne.menu_id,
+      titre: ligne.titre,
+      nombreCommandes: parseInt(ligne.nombre_commandes) || 0,
+      chiffreAffaires: parseFloat(ligne.ca) || 0,
+    }));
+
+    const totalCa = menus.reduce((sum, m) => sum + m.chiffreAffaires, 0);
+
+    res.json({ menus, totalCa, periode });
+  } catch (erreur) {
+    console.error("Erreur CA par menu :", erreur);
+    res.status(500).json({ erreur: "Erreur serveur" });
+  }
+}
+
