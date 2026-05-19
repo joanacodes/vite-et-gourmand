@@ -17,6 +17,7 @@ import ReinitialiserMotDePasse from './pages/auth/ReinitialiserMotDePasse'
 
 import PagePlaceholder from './pages/pro/PagePlaceholder'
 import DashboardAdmin from './pages/pro/admin/Dashboard'
+import GestionCommandes from './pages/pro/GestionCommandes'
 
 function PageIntrouvable() {
     return (
@@ -66,7 +67,7 @@ function App() {
                 }
             >
                 <Route index element={<PagePlaceholder titre="Tableau de bord" description="Vue d'ensemble de votre activité" />} />
-                <Route path="commandes" element={<PagePlaceholder titre="Gestion des commandes" />} />
+                <Route path="commandes" element={<GestionCommandes racine="/employe" />} />
                 <Route path="commandes/:numero" element={<PagePlaceholder titre="Détail commande" />} />
                 <Route path="menus" element={<PagePlaceholder titre="Gestion des menus" />} />
                 <Route path="plats" element={<PagePlaceholder titre="Gestion des plats" />} />
@@ -88,7 +89,7 @@ function App() {
                 <Route path="menus/nouveau" element={<PagePlaceholder titre="Créer un menu" />} />
                 <Route path="menus/:id" element={<PagePlaceholder titre="Modifier un menu" />} />
                 <Route path="plats" element={<PagePlaceholder titre="Gestion des plats" />} />
-                <Route path="commandes" element={<PagePlaceholder titre="Gestion des commandes" />} />
+                <Route path="commandes" element={<GestionCommandes racine="/admin" />} />
                 <Route path="commandes/:numero" element={<PagePlaceholder titre="Détail commande" />} />
                 <Route path="utilisateurs" element={<PagePlaceholder titre="Utilisateurs" />} />
                 <Route path="avis" element={<PagePlaceholder titre="Modération des avis" />} />
