@@ -74,6 +74,27 @@
     color: var(--color-bordeaux);
 }
 
+/* Bouton "Mon espace" (raccourci vers espace pro pour employes/admins) */
+.navbar-bouton-espacepro {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: var(--radius-md);
+    color: var(--color-blanc) !important;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.navbar-bouton-espacepro:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-blanc);
+    color: var(--color-blanc) !important;
+}
+
 /* Responsive : menu plus compact sur mobile */
 @media (max-width: 768px) {
     .navbar-logo {

@@ -1,13 +1,18 @@
 // ============================================================
 // PAGE ACCUEIL - Page d'entree du site
 //
-// Sections (selon enonce p.3) :
+// Sections (selon enonce p.3 + maquette UX Pilot) :
 // 1. Hero avec animation photos defilantes + 2 CTA
-// 2. Nos services (mariage / entreprise / famille)
-// 3. Apercu menus (3 derniers depuis le back)
-// 4. Carrousel avis clients (dynamique depuis /api/avis?statut=valide)
-// 5. Notre histoire (Julie & Jose, 25 ans)
-// 6. CTA final vers contact
+// 2. Sous-services : Diners Prives + Cocktails (NOUVEAU)
+// 3. Apercu menus (3 premiers depuis le back) - inchange
+// 4. Nos services (mariage / entreprise / famille)
+// 5. Carrousel avis clients
+// 6. Notre histoire (Julie & Jose, 25 ans)
+// 7. Nos menus detailles (3 menus avec leurs plats) (NOUVEAU)
+// 8. FAQ - Questions frequentes (NOUVEAU)
+// 9. Mini bloc Contact (NOUVEAU)
+// 10. Bloc "Julie & Jose" presentation (NOUVEAU)
+// 11. CTA final
 // ============================================================
 
 import { useState, useEffect } from 'react'
@@ -29,11 +34,51 @@ const photosHero = [
     'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&q=80',
 ]
 
+// Photos pour la section "menus detailles" (dynamiques - 3 vues larges)
+const photosMenusDetailles = [
+    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80',
+    'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&q=80',
+    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80',
+]
+
+// Photos Julie & Jose (chef pâtissière + chef cuisinier - Unsplash libre de droits)
+const photoJulie = 'https://images.unsplash.com/photo-1607631568010-a87245c0daf8?w=400&q=80'
+const photoJose = 'https://images.unsplash.com/photo-1583394293214-28ded15ee548?w=400&q=80'
+
+// Questions FAQ (en dur - ce sont des infos generiques de l'entreprise)
+const questionsFaq = [
+    {
+        question: "Quel est le délai de commande pour un événement ?",
+        reponse: "Nous recommandons de nous contacter au moins 2 semaines avant votre événement pour les petites réceptions (10-20 personnes). Pour les grands événements (plus de 25 personnes), prévoyez idéalement 4 à 6 semaines. Cependant, n'hésitez pas à nous contacter même pour des délais plus courts : nous ferons notre maximum pour répondre à votre demande."
+    },
+    {
+        question: "Livrez-vous en dehors de Bordeaux ?",
+        reponse: "Oui, nous livrons dans toute la métropole bordelaise et ses environs dans un rayon de 30 km autour de Bordeaux. Une facturation de livraison est appliquée (5€ forfaitaires + 0,59€/km parcouru hors Bordeaux). Pour les événements plus éloignés, contactez-nous pour étudier la faisabilité."
+    },
+    {
+        question: "Peut-on personnaliser les menus proposés ?",
+        reponse: "Absolument ! Nos menus sont des suggestions qui nous permettent de présenter notre savoir-faire. Nous nous adaptons à vos préférences, allergies, régimes spéciaux et votre budget. Julie et José vous accueillent volontiers pour un échange afin de créer ensemble le menu idéal de votre événement."
+    },
+    {
+        question: "Proposez-vous des dégustations avant l'événement ?",
+        reponse: "Oui, pour les événements importants (mariages, grands événements d'entreprise), nous proposons des séances de dégustation sur rendez-vous dans notre atelier bordelais. Cela vous permet de découvrir nos créations, d'affiner votre choix et de vous projeter sereinement dans votre événement."
+    },
+    {
+        question: "Quels sont les modes de paiement acceptés ?",
+        reponse: "Nous acceptons les paiements par virement bancaire, chèque et espèces. Un acompte de 30% est demandé à la validation de la commande pour confirmer votre réservation. Le solde est dû le jour de la prestation. Pour les entreprises, nous proposons également le paiement à 30 jours sur facture."
+    },
+    {
+        question: "Fournissez-vous le matériel (vaisselle, nappes, etc.) ?",
+        reponse: "Nous proposons en location vaisselle, verrerie, nappes, couverts et matériel de buffet de qualité. La location est précisée dans le devis. Attention : tout matériel non restitué dans les 10 jours ouvrés après l'événement fait l'objet d'une facturation de 600€ (mentionné dans nos CGV)."
+    },
+]
+
 export default function Accueil() {
     const [menus, setMenus] = useState<Menu[]>([])
     const [avis, setAvis] = useState<Avis[]>([])
     const [indexAvis, setIndexAvis] = useState(0)
     const [chargement, setChargement] = useState(true)
+    const [faqOuverte, setFaqOuverte] = useState<number | null>(0) // Premiere question ouverte par defaut
 
     // === CHARGEMENT INITIAL : menus + avis ===
     useEffect(() => {
@@ -45,8 +90,8 @@ export default function Accueil() {
                     api.get<{ avis: Avis[] }>('/api/avis?statut=valide').catch(() => ({ avis: [] })),
                 ])
 
-                // On prend les 3 derniers menus pour l'apercu
-                setMenus(donneesMenus.menus.slice(0, 3))
+                // On garde tous les menus (on en utilisera 3 pour l'apercu et 3 pour la section detaillee)
+                setMenus(donneesMenus.menus)
                 setAvis(donneesAvis.avis)
             } catch (err) {
                 console.error('Erreur chargement accueil:', err)
@@ -95,6 +140,26 @@ export default function Accueil() {
         ))
     }
 
+    // === HELPER : grouper les plats par type (entree/plat/dessert) ===
+    function platsParType(menu: Menu) {
+        const plats = menu.plats || []
+        return {
+            entrees: plats.filter(p => p.type === 'entree'),
+            plats: plats.filter(p => p.type === 'plat'),
+            desserts: plats.filter(p => p.type === 'dessert'),
+        }
+    }
+
+    // === HELPER : toggle FAQ ===
+    function toggleFaq(index: number) {
+        setFaqOuverte(faqOuverte === index ? null : index)
+    }
+
+    // 3 menus pour l'apercu (en haut)
+    const menusApercu = menus.slice(0, 3)
+    // 3 menus pour la section detaillee (en bas, avec plats)
+    const menusDetailles = menus.slice(0, 3)
+
     // === RENDU ===
 
     return (
@@ -138,7 +203,38 @@ export default function Accueil() {
             </section>
 
             {/* ============================================================ */}
-            {/* SECTION 2 : NOS SERVICES                                      */}
+            {/* SECTION 2 : APERCU MENUS (dynamique depuis le back)            */}
+            {/* ============================================================ */}
+            <section className="accueil-menus">
+                <div className="container">
+                    <div className="d-flex justify-content-between align-items-end flex-wrap mb-4">
+                        <div>
+                            <span className="accueil-section-supratitre">Nos Menus</span>
+                            <h2 className="accueil-section-titre">Découvrez nos menus</h2>
+                        </div>
+                        <Link to="/menus" className="accueil-menus-lien-tous">
+                            Voir tous nos menus →
+                        </Link>
+                    </div>
+
+                    {chargement ? (
+                        <div className="text-center py-5">
+                            <div className="spinner-border" style={{ color: 'var(--color-bordeaux)' }} role="status">
+                                <span className="visually-hidden">Chargement...</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="accueil-menus-grille">
+                            {menusApercu.map((m) => (
+                                <CarteMenu key={m.menu_id} menu={m} />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* SECTION 3 : NOS SERVICES                                       */}
             {/* ============================================================ */}
             <section className="accueil-services">
                 <div className="container">
@@ -201,37 +297,52 @@ export default function Accueil() {
                             </p>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            {/* ============================================================ */}
-            {/* SECTION 3 : APERCU MENUS (dynamique depuis le back)            */}
-            {/* ============================================================ */}
-            <section className="accueil-menus">
-                <div className="container">
-                    <div className="d-flex justify-content-between align-items-end flex-wrap mb-4">
-                        <div>
-                            <span className="accueil-section-supratitre">Nos Menus</span>
-                            <h2 className="accueil-section-titre">Découvrez nos menus</h2>
-                        </div>
-                        <Link to="/menus" className="accueil-menus-lien-tous">
-                            Voir tous nos menus →
-                        </Link>
-                    </div>
-
-                    {chargement ? (
-                        <div className="text-center py-5">
-                            <div className="spinner-border" style={{ color: 'var(--color-bordeaux)' }} role="status">
-                                <span className="visually-hidden">Chargement...</span>
+                    {/* ===== SOUS-SECTION : Diners Prives + Cocktails ===== */}
+                    <div className="accueil-sous-services">
+                        <div className="accueil-sous-service-card">
+                            <div className="accueil-sous-service-icone" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M3 11h18v9H3z" />
+                                    <path d="M12 11V2" />
+                                    <path d="M8 2h8" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 className="accueil-sous-service-titre">Dîners Privés & Brunchs</h4>
+                                <p className="accueil-sous-service-texte">
+                                    Recevez en toute intimité ! Nos menus dîners et brunchs gourmets,
+                                    livrés à domicile et présentés avec élégance, transforment vos
+                                    soirées en moments d'exception.
+                                </p>
                             </div>
                         </div>
-                    ) : (
-                        <div className="accueil-menus-grille">
-                            {menus.map((m) => (
-                                <CarteMenu key={m.menu_id} menu={m} />
-                            ))}
+
+                        <div className="accueil-sous-service-card">
+                            <div className="accueil-sous-service-icone" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M8 22h8" />
+                                    <path d="M12 11v11" />
+                                    <path d="m19 3-7 8-7-8Z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 className="accueil-sous-service-titre">Cocktails & Apéritifs</h4>
+                                <p className="accueil-sous-service-texte">
+                                    Inaugurations, vernissages, soirées networking : nos bouchées
+                                    raffinées et nos cocktails créatifs font de chaque mise en
+                                    bouche un moment de partage savoureux.
+                                </p>
+                            </div>
                         </div>
-                    )}
+                    </div>
+
+                    {/* Bouton CTA en bas de section */}
+                    <div className="text-center mt-5">
+                        <Link to="/menus" className="btn btn-primary btn-lg">
+                            Découvrir nos menus
+                        </Link>
+                    </div>
                 </div>
             </section>
 
@@ -350,7 +461,313 @@ export default function Accueil() {
             </section>
 
             {/* ============================================================ */}
-            {/* SECTION 6 : CTA FINAL                                          */}
+            {/* SECTION 6 : NOS MENUS DETAILLES (3 menus avec composition)    */}
+            {/* ============================================================ */}
+            {menusDetailles.length > 0 && (
+                <section className="accueil-menus-detailles">
+                    <div className="container">
+                        <div className="text-center mb-5">
+                            <h2 className="accueil-section-titre">Nos menus détaillés</h2>
+                            <p className="accueil-section-soustitre">
+                                Découvrez la composition complète de chacun de nos menus,
+                                élaborés avec soin par Julie et José.
+                            </p>
+                        </div>
+
+                        <div className="accueil-menus-detailles-grille">
+                            {menusDetailles.map((menu, idx) => {
+                                const { entrees, plats, desserts } = platsParType(menu)
+                                const photoMenu = menu.image_principale?.url || photosMenusDetailles[idx]
+
+                                return (
+                                    <article key={menu.menu_id} className="accueil-menu-detaille">
+                                        <div className="accueil-menu-detaille-image">
+                                            <img
+                                                src={photoMenu}
+                                                alt={`Photo du menu ${menu.titre}`}
+                                                loading="lazy"
+                                            />
+                                            <div className="accueil-menu-detaille-prix">
+                                                {Number(menu.prix_par_personne).toFixed(0)}€<span>/pers.</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="accueil-menu-detaille-contenu">
+                                            <div className="accueil-menu-detaille-entete">
+                                                <h3 className="accueil-menu-detaille-titre">
+                                                    {menu.titre}
+                                                </h3>
+                                                <span className="accueil-menu-detaille-badge">
+                                                    Min. {menu.nombre_personnes_minimum} pers.
+                                                </span>
+                                            </div>
+
+                                            <p className="accueil-menu-detaille-description">
+                                                {menu.description}
+                                            </p>
+
+                                            {/* Liste des plats par categorie */}
+                                            <div className="accueil-menu-detaille-composition">
+                                                {entrees.length > 0 && (
+                                                    <div className="accueil-menu-detaille-categorie">
+                                                        <h4 className="accueil-menu-detaille-cat-titre">Entrée</h4>
+                                                        <ul>
+                                                            {entrees.map(p => (
+                                                                <li key={p.plat_id}>{p.titre}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+
+                                                {plats.length > 0 && (
+                                                    <div className="accueil-menu-detaille-categorie">
+                                                        <h4 className="accueil-menu-detaille-cat-titre">Plat</h4>
+                                                        <ul>
+                                                            {plats.map(p => (
+                                                                <li key={p.plat_id}>{p.titre}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+
+                                                {desserts.length > 0 && (
+                                                    <div className="accueil-menu-detaille-categorie">
+                                                        <h4 className="accueil-menu-detaille-cat-titre">Dessert</h4>
+                                                        <ul>
+                                                            {desserts.map(p => (
+                                                                <li key={p.plat_id}>{p.titre}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <Link
+                                                to={`/menu/${menu.menu_id}`}
+                                                className="btn btn-outline-primary w-100 mt-3"
+                                            >
+                                                Voir le détail
+                                            </Link>
+                                        </div>
+                                    </article>
+                                )
+                            })}
+                        </div>
+
+                        <div className="text-center mt-5">
+                            <Link to="/menus" className="btn btn-primary btn-lg">
+                                Voir tous les menus
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* ============================================================ */}
+            {/* SECTION 7 : FAQ - Questions frequentes                         */}
+            {/* ============================================================ */}
+            <section className="accueil-faq">
+                <div className="container">
+                    <div className="text-center mb-5">
+                        <h2 className="accueil-faq-titre">Questions fréquentes</h2>
+                        <p className="accueil-faq-soustitre">
+                            Retrouvez les réponses aux questions les plus courantes sur nos services de traiteur.
+                        </p>
+                    </div>
+
+                    <div className="accueil-faq-liste">
+                        {questionsFaq.map((item, idx) => {
+                            const estOuverte = faqOuverte === idx
+                            return (
+                                <div
+                                    key={idx}
+                                    className={`accueil-faq-item ${estOuverte ? 'ouverte' : ''}`}
+                                >
+                                    <button
+                                        type="button"
+                                        className="accueil-faq-question"
+                                        onClick={() => toggleFaq(idx)}
+                                        aria-expanded={estOuverte}
+                                        aria-controls={`faq-reponse-${idx}`}
+                                    >
+                                        <span>{item.question}</span>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            aria-hidden="true"
+                                            className={`accueil-faq-chevron ${estOuverte ? 'ouvert' : ''}`}
+                                        >
+                                            <path d="m6 9 6 6 6-6" />
+                                        </svg>
+                                    </button>
+                                    <div
+                                        id={`faq-reponse-${idx}`}
+                                        className="accueil-faq-reponse"
+                                        role="region"
+                                        hidden={!estOuverte}
+                                    >
+                                        <p>{item.reponse}</p>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* SECTION 8 : MINI BLOC CONTACT                                  */}
+            {/* ============================================================ */}
+            <section className="accueil-contact-mini">
+                <div className="container">
+                    <div className="text-center mb-5">
+                        <h2 className="accueil-section-titre">Contactez-nous</h2>
+                        <p className="accueil-section-soustitre">
+                            Une question ? Un projet d'événement ? Julie et José sont à votre
+                            écoute pour créer ensemble le menu parfait.
+                        </p>
+                    </div>
+
+                    <div className="accueil-contact-mini-grille">
+                        {/* Coordonnees */}
+                        <div className="accueil-contact-mini-carte">
+                            <h3 className="accueil-contact-mini-titre">Nos coordonnées</h3>
+                            <ul className="accueil-contact-mini-liste">
+                                <li>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                                    </svg>
+                                    <div>
+                                        <strong>Téléphone</strong>
+                                        <span>05 56 00 00 00</span>
+                                        <small>Lun-Sam, 9h-19h - Dim 10h-18h</small>
+                                    </div>
+                                </li>
+                                <li>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <rect width="20" height="16" x="2" y="4" rx="2" />
+                                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                                    </svg>
+                                    <div>
+                                        <strong>Email</strong>
+                                        <span>contact@vite-et-gourmand.fr</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+                                        <circle cx="12" cy="10" r="3" />
+                                    </svg>
+                                    <div>
+                                        <strong>Adresse</strong>
+                                        <span>12 Rue des Gourmets</span>
+                                        <small>33000 Bordeaux, France</small>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Besoin d'aide */}
+                        <div className="accueil-contact-mini-carte accueil-contact-mini-aide">
+                            <h3 className="accueil-contact-mini-titre">Besoin d'aide ?</h3>
+                            <p>
+                                Notre équipe est disponible pour répondre à toutes vos questions
+                                et vous accompagner dans l'organisation de votre événement parfait.
+                            </p>
+                            <ul className="accueil-contact-mini-bullets">
+                                <li>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                    Devis gratuit & personnalisé
+                                </li>
+                                <li>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                    Conseils sur le choix des menus
+                                </li>
+                                <li>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                    Dégustations possibles sur rendez-vous
+                                </li>
+                                <li>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M20 6 9 17l-5-5" />
+                                    </svg>
+                                    Livraison dans tout Bordeaux
+                                </li>
+                            </ul>
+                            <Link to="/contact" className="btn btn-primary w-100 mt-3">
+                                Nous contacter
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* SECTION 9 : JULIE & JOSE - Presentation des chefs              */}
+            {/* ============================================================ */}
+            <section className="accueil-chefs">
+                <div className="container">
+                    <div className="text-center mb-5">
+                        <h2 className="accueil-section-titre">Julie & José, 25 ans de passion</h2>
+                    </div>
+
+                    <div className="accueil-chefs-grille">
+                        {/* Julie - Chef Patissiere */}
+                        <article className="accueil-chef-card">
+                            <div className="accueil-chef-photo">
+                                <img
+                                    src={photoJulie}
+                                    alt="Portrait de Julie, chef pâtissière de Vite & Gourmand"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div className="accueil-chef-info">
+                                <h3 className="accueil-chef-nom">Julie</h3>
+                                <p className="accueil-chef-role">Chef Pâtissière</p>
+                                <p className="accueil-chef-bio">
+                                    Créatrice de douceurs depuis l'enfance, Julie sublime chaque
+                                    fin de repas avec une touche d'élégance.
+                                </p>
+                            </div>
+                        </article>
+
+                        {/* Jose - Chef Cuisinier */}
+                        <article className="accueil-chef-card">
+                            <div className="accueil-chef-photo">
+                                <img
+                                    src={photoJose}
+                                    alt="Portrait de José, chef cuisinier de Vite & Gourmand"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div className="accueil-chef-info">
+                                <h3 className="accueil-chef-nom">José</h3>
+                                <p className="accueil-chef-role">Chef Cuisinier</p>
+                                <p className="accueil-chef-bio">
+                                    Passionné par les produits du terroir, José cuisine des
+                                    plats généreux qui célèbrent le meilleur de la cuisine française.
+                                </p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* SECTION 10 : CTA FINAL                                         */}
             {/* ============================================================ */}
             <section className="accueil-cta-final">
                 <div className="container text-center py-5">

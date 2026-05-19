@@ -1,0 +1,220 @@
+/* ============================================================
+   PAGE CONTACT - Styles
+   Charte : bordeaux #7B2D26, vert sauge #3E5C4A, creme #FAF3E7
+   ============================================================ */
+
+.page-contact {
+    background-color: var(--color-creme-ivoire);
+    min-height: calc(100vh - 200px);
+}
+
+/* ===== HERO ===== */
+.contact-hero {
+    background: linear-gradient(135deg, var(--color-bordeaux) 0%, var(--color-bordeaux-hover) 100%);
+    color: var(--color-blanc);
+    padding: var(--space-3xl) 0 var(--space-2xl);
+    text-align: center;
+}
+
+.contact-hero-titre {
+    font-size: var(--text-3xl);
+    margin-bottom: var(--space-md);
+    color: var(--color-blanc);
+}
+
+.contact-hero-soustitre {
+    font-size: var(--text-md);
+    max-width: 600px;
+    margin: 0 auto;
+    opacity: 0.95;
+    line-height: 1.6;
+}
+
+/* ===== CORPS (deux colonnes) ===== */
+.contact-corps {
+    padding: var(--space-2xl) 0 var(--space-3xl);
+}
+
+.contact-carte {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-xl);
+    height: 100%;
+}
+
+.contact-titre-carte {
+    font-size: var(--text-xl);
+    color: var(--color-bordeaux);
+    margin-bottom: var(--space-lg);
+}
+
+/* ===== ETAT SUCCES ===== */
+.contact-succes {
+    text-align: center;
+    padding: var(--space-xl) var(--space-md);
+}
+
+.contact-succes-icone {
+    color: var(--color-vert-succes);
+    margin-bottom: var(--space-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.contact-succes h3 {
+    color: var(--color-bordeaux);
+    margin-bottom: var(--space-sm);
+}
+
+/* ===== COLONNE INFOS ===== */
+.contact-carte-infos {
+    background: var(--color-blanc);
+}
+
+.contact-info-bloc {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-gris-clair);
+}
+
+.contact-info-bloc:last-of-type {
+    border-bottom: none;
+    margin-bottom: var(--space-md);
+}
+
+.contact-info-icone {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background-color: rgba(123, 45, 38, 0.08);
+    color: var(--color-bordeaux);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-info-titre {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--color-anthracite);
+    margin-bottom: var(--space-xs);
+}
+
+.contact-info-texte {
+    color: var(--color-gris-texte);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.contact-info-texte a {
+    color: var(--color-bleu-nuit);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.contact-info-texte a:hover {
+    color: var(--color-bleu-nuit-hover);
+    text-decoration: underline;
+}
+
+/* Liste horaires */
+.contact-horaires {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.contact-horaires li {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-xs) 0;
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+}
+
+.contact-horaires li span:first-child {
+    font-weight: 500;
+    color: var(--color-anthracite);
+}
+
+/* Encadre info delai de reponse */
+.contact-encadre-info {
+    display: flex;
+    gap: var(--space-sm);
+    background-color: var(--color-creme-ivoire);
+    border-left: 3px solid var(--color-bordeaux);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-md);
+    color: var(--color-gris-texte);
+}
+
+.contact-encadre-info svg {
+    color: var(--color-bordeaux);
+}
+
+/* ===== FORMULAIRE - personnalisation Bootstrap ===== */
+.page-contact .form-control {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-gris-clair);
+    padding: 0.625rem 0.875rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.page-contact .form-control:focus {
+    border-color: var(--color-bordeaux);
+    box-shadow: 0 0 0 0.2rem rgba(123, 45, 38, 0.15);
+}
+
+.page-contact .form-label {
+    color: var(--color-anthracite);
+    margin-bottom: var(--space-xs);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 991px) {
+    .contact-hero {
+        padding: var(--space-2xl) 0 var(--space-xl);
+    }
+
+    .contact-hero-titre {
+        font-size: var(--text-2xl);
+    }
+
+    .contact-corps {
+        padding: var(--space-xl) 0;
+    }
+
+    .contact-carte {
+        padding: var(--space-lg);
+    }
+}
+
+@media (max-width: 576px) {
+    .contact-hero-titre {
+        font-size: var(--text-xl);
+    }
+
+    .contact-hero-soustitre {
+        font-size: var(--text-base);
+        padding: 0 var(--space-md);
+    }
+
+    .contact-carte {
+        padding: var(--space-md);
+    }
+
+    .contact-info-bloc {
+        gap: var(--space-sm);
+    }
+}

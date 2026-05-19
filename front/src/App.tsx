@@ -1,18 +1,21 @@
 import { Routes, Route } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
-import Navbar from './components/layout/Navbar'
-import Footer from './components/layout/Footer'
+
+import LayoutPublic from './components/layout/LayoutPublic'
+import LayoutPro from './components/layout/LayoutPro'
+import RouteProtegee from './components/RouteProtegee'
+
+import Accueil from './pages/Accueil'
+import Menus from './pages/Menus'
+import DetailMenu from './pages/DetailMenu'
+import Commande from './pages/Commande'
+import Contact from './pages/Contact'
 import Connexion from './pages/auth/Connexion'
 import Inscription from './pages/auth/Inscription'
 import MotDePasseOublie from './pages/auth/MotDePasseOublie'
 import ReinitialiserMotDePasse from './pages/auth/ReinitialiserMotDePasse'
-import Menus from './pages/Menus'
-import DetailMenu from './pages/DetailMenu'
-import Accueil from './pages/Accueil'
-import Contact from './pages/Contact'
-import Commande from './pages/Commande'
 
-// Pages provisoires inline (a extraire au fur et a mesure)
+import PagePlaceholder from './pages/pro/PagePlaceholder'
 
 function PageIntrouvable() {
     return (
@@ -37,10 +40,9 @@ function App() {
     }
 
     return (
-        <>
-            <Navbar />
-
-            <Routes>
+        <Routes>
+            {/* ===== ROUTES PUBLIQUES (Navbar + Footer) ===== */}
+            <Route element={<LayoutPublic />}>
                 <Route path="/" element={<Accueil />} />
                 <Route path="/menus" element={<Menus />} />
                 <Route path="/menu/:id" element={<DetailMenu />} />
@@ -51,10 +53,48 @@ function App() {
                 <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
                 <Route path="/reinitialiser-mot-de-passe" element={<ReinitialiserMotDePasse />} />
                 <Route path="*" element={<PageIntrouvable />} />
-            </Routes>
+            </Route>
 
-            <Footer />
-        </>
+            {/* ===== ESPACE EMPLOYE ===== */}
+            <Route
+                path="/employe"
+                element={
+                    <RouteProtegee rolesAutorises={['employe', 'administrateur']}>
+                        <LayoutPro espace="employe" />
+                    </RouteProtegee>
+                }
+            >
+                <Route index element={<PagePlaceholder titre="Tableau de bord" description="Vue d'ensemble de votre activité" />} />
+                <Route path="commandes" element={<PagePlaceholder titre="Gestion des commandes" />} />
+                <Route path="commandes/:numero" element={<PagePlaceholder titre="Détail commande" />} />
+                <Route path="menus" element={<PagePlaceholder titre="Gestion des menus" />} />
+                <Route path="plats" element={<PagePlaceholder titre="Gestion des plats" />} />
+                <Route path="horaires" element={<PagePlaceholder titre="Horaires" />} />
+                <Route path="avis" element={<PagePlaceholder titre="Modération des avis" />} />
+            </Route>
+
+            {/* ===== ESPACE ADMIN ===== */}
+            <Route
+                path="/admin"
+                element={
+                    <RouteProtegee rolesAutorises={['administrateur']}>
+                        <LayoutPro espace="admin" />
+                    </RouteProtegee>
+                }
+            >
+                <Route index element={<PagePlaceholder titre="Tableau de bord" description="Vue globale de l'activité" />} />
+                <Route path="menus" element={<PagePlaceholder titre="Gestion des menus" />} />
+                <Route path="menus/nouveau" element={<PagePlaceholder titre="Créer un menu" />} />
+                <Route path="menus/:id" element={<PagePlaceholder titre="Modifier un menu" />} />
+                <Route path="plats" element={<PagePlaceholder titre="Gestion des plats" />} />
+                <Route path="commandes" element={<PagePlaceholder titre="Gestion des commandes" />} />
+                <Route path="commandes/:numero" element={<PagePlaceholder titre="Détail commande" />} />
+                <Route path="utilisateurs" element={<PagePlaceholder titre="Utilisateurs" />} />
+                <Route path="avis" element={<PagePlaceholder titre="Modération des avis" />} />
+                <Route path="statistiques" element={<PagePlaceholder titre="Statistiques" />} />
+                <Route path="parametres" element={<PagePlaceholder titre="Paramètres" />} />
+            </Route>
+        </Routes>
     )
 }
 
