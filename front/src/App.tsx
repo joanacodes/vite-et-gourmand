@@ -9,17 +9,10 @@ import ReinitialiserMotDePasse from './pages/auth/ReinitialiserMotDePasse'
 import Menus from './pages/Menus'
 import DetailMenu from './pages/DetailMenu'
 import Accueil from './pages/Accueil'
+import Contact from './pages/Contact'
+import Commande from './pages/Commande'
 
 // Pages provisoires inline (a extraire au fur et a mesure)
-
-function Contact() {
-    return (
-        <main className="container py-5">
-            <h1>Contact</h1>
-            <p>Page en cours de construction.</p>
-        </main>
-    )
-}
 
 function PageIntrouvable() {
     return (
@@ -51,6 +44,7 @@ function App() {
                 <Route path="/" element={<Accueil />} />
                 <Route path="/menus" element={<Menus />} />
                 <Route path="/menu/:id" element={<DetailMenu />} />
+                <Route path="/commande/:id" element={<Commande />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/connexion" element={<Connexion />} />
                 <Route path="/inscription" element={<Inscription />} />
