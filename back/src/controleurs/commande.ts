@@ -17,6 +17,7 @@ import {
   envoyerEmailConfirmationCommande,
   envoyerEmailStatutCommande,
   envoyerEmailAnnulationCommande,
+  envoyerEmailLibreClient,
 } from "../services/email";
 import {
   loggerCreationCommande,
@@ -836,5 +837,63 @@ export async function modifierCommande(req: Request, res: Response) {
     res.status(500).json({ erreur: "Erreur serveur" });
   } finally {
     client.release();
+  }
+}
+
+// ============================================================
+// ENVOYER UN EMAIL AU CLIENT D'UNE COMMANDE
+// POST /api/commandes/:numero/contact-client
+// Reserve aux employes et admins. Permet d'envoyer un email
+// libre au client d'une commande (precisions, modifs, etc).
+// ============================================================
+export async function contactClient(req: Request, res: Response) {
+  try {
+    const numero = String(req.params.numero);
+    const { sujet, message } = req.body;
+    const utilisateur = req.session.utilisateur!;
+
+    if (!sujet?.trim() || !message?.trim()) {
+      return res.status(400).json({ erreur: "Sujet et message obligatoires" });
+    }
+
+    // Recup les infos du client lie a la commande
+    const resultatClient = await pool.query(
+      `SELECT u.email, u.prenom, u.nom
+       FROM commande c
+       JOIN utilisateur u ON c.utilisateur_id = u.utilisateur_id
+       WHERE c.numero_commande = $1`,
+      [numero],
+    );
+
+    if (resultatClient.rows.length === 0) {
+      return res.status(404).json({ erreur: "Commande introuvable" });
+    }
+
+    const client = resultatClient.rows[0];
+    const nomClient = `${client.prenom} ${client.nom}`;
+
+    // Recup nom de l'expediteur depuis BDD (la session n'a que id, email, role)
+    const resultatExpediteur = await pool.query(
+      `SELECT prenom, nom FROM utilisateur WHERE utilisateur_id = $1`,
+      [utilisateur.id],
+    );
+    const expediteur = resultatExpediteur.rows[0];
+    const nomExpediteur = expediteur
+      ? `${expediteur.prenom} ${expediteur.nom}`
+      : "L'equipe Vite & Gourmand";
+
+    await envoyerEmailLibreClient(
+      client.email,
+      nomClient,
+      sujet.trim(),
+      message.trim(),
+      numero,
+      nomExpediteur,
+    );
+
+    res.json({ message: "Email envoye au client" });
+  } catch (erreur) {
+    console.error("Erreur envoi email client :", erreur);
+    res.status(500).json({ erreur: "Erreur lors de l'envoi de l'email" });
   }
 }

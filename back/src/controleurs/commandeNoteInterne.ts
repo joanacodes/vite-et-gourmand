@@ -33,12 +33,13 @@ export async function listerNotesInternes(req: Request, res: Response) {
       return res.status(404).json({ erreur: "Commande introuvable" });
     }
 
-    // Recuperer les notes avec les infos de l'auteur (jointure utilisateur)
+    // Recuperer les notes avec les infos de l'auteur (jointure utilisateur + role)
     const resultat = await pool.query(
       `SELECT n.note_id, n.numero_commande, n.contenu, n.date_creation,
-                    n.auteur_id, u.prenom AS auteur_prenom, u.nom AS auteur_nom, u.role AS auteur_role
+                    n.auteur_id, u.prenom AS auteur_prenom, u.nom AS auteur_nom, r.libelle AS auteur_role
              FROM commande_note_interne n
              JOIN utilisateur u ON n.auteur_id = u.utilisateur_id
+             JOIN role r ON u.role_id = r.role_id
              WHERE n.numero_commande = $1
              ORDER BY n.date_creation DESC`,
       [numero],

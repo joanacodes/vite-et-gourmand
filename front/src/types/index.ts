@@ -90,10 +90,14 @@ export interface Commande {
     pret_materiel: boolean
     notes_client: string | null
     menu_titre?: string
+    menu_description?: string
+    menu_id?: number
+    prix_par_personne?: number
     utilisateur_id?: number
     client_nom?: string
     client_prenom?: string
     client_email?: string
+    client_telephone?: string
 }
 
 // ----- AVIS -----

@@ -355,3 +355,41 @@ export async function envoyerEmailAvisPublie(
         html: contenuHTML
     });
 }
+
+
+// ============================================================
+// EMAIL LIBRE ENVOYE PAR UN EMPLOYE A UN CLIENT
+// Lie a une commande - permet a l'equipe de contacter le client
+// pour des precisions, modifications, etc.
+// Type : transactionnel (lie a une action manuelle de l'equipe)
+// ============================================================
+export async function envoyerEmailLibreClient(
+    emailClient: string,
+    nomClient: string,
+    sujet: string,
+    message: string,
+    numeroCommande: string,
+    nomExpediteur: string
+) {
+    const contenuHTML = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #7B2D26;">Vite & Gourmand</h1>
+            <p>Bonjour ${nomClient},</p>
+            <div style="background: #FAF3E7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                ${message.replace(/\n/g, "<br>")}
+            </div>
+            <p style="color: #666; font-size: 12px; border-top: 1px solid #ddd; padding-top: 15px;">
+                Message envoye par ${nomExpediteur} concernant votre commande
+                <strong>${numeroCommande}</strong>.<br>
+                Vous pouvez repondre directement a cet email.
+            </p>
+        </div>
+    `;
+
+    return transporteur.sendMail({
+        from: '"Vite & Gourmand" <contact@vite-et-gourmand.fr>',
+        to: emailClient,
+        subject: sujet,
+        html: contenuHTML
+    });
+}

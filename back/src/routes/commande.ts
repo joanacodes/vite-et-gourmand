@@ -12,6 +12,7 @@ import {
     modifierStatutCommande,
     annulerCommande,
     obtenirHistoriqueCommande,
+    contactClient,
 } from "../controleurs/commande";
 import { estConnecte, estEmploye } from "../middlewares/auth";
 
@@ -42,6 +43,9 @@ routeur.put("/:numero/annuler", annulerCommande);
 
 // Modifier le statut (employe/admin uniquement)
 routeur.put("/:numero/statut", estEmploye, modifierStatutCommande);
+
+// Contacter le client par email (employe/admin uniquement)
+routeur.post("/:numero/contact-client", estEmploye, contactClient);
 
 console.log("📋 Nombre de routes enregistrees :", routeur.stack.length);
 
