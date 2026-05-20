@@ -64,8 +64,9 @@ export default function LayoutPro({ espace }: Props) {
     const racine = espace === 'admin' ? '/admin' : '/employe'
 
     // Menus differents selon l'espace
+    // Note : pas de "Tableau de bord" pour les employes (reserve a l'admin).
+    // L'index /employe redirige vers /employe/commandes (defini dans App.tsx).
     const itemsEmploye: ItemMenu[] = [
-        { chemin: `${racine}`, label: 'Tableau de bord', icone: <LayoutDashboard size={18} /> },
         { chemin: `${racine}/commandes`, label: 'Commandes', icone: <ClipboardList size={18} />, badge: nbCommandesEnAttente },
         { chemin: `${racine}/menus`, label: 'Menus', icone: <UtensilsCrossed size={18} /> },
         { chemin: `${racine}/plats`, label: 'Plats', icone: <Soup size={18} /> },

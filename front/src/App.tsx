@@ -1,8 +1,9 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 
 import LayoutPublic from './components/layout/LayoutPublic'
 import LayoutPro from './components/layout/LayoutPro'
+import LayoutClient from './components/layout/LayoutClient'
 import RouteProtegee from './components/RouteProtegee'
 
 import Accueil from './pages/Accueil'
@@ -20,11 +21,20 @@ import DashboardAdmin from './pages/pro/admin/Dashboard'
 import ListeMenus from './pages/pro/admin/ListeMenus'
 import FormulaireMenu from './pages/pro/admin/FormulaireMenu'
 import GestionUtilisateurs from './pages/pro/admin/GestionUtilisateurs'
+import Parametres from './pages/pro/admin/Parametres'
+import Statistiques from './pages/pro/admin/Statistiques'
 import GestionCommandes from './pages/pro/GestionCommandes'
 import DetailCommande from './pages/pro/DetailCommande'
 import GestionPlats from './pages/pro/GestionPlats'
 import GestionHoraires from './pages/pro/GestionHoraires'
 import ModerationAvis from './pages/pro/ModerationAvis'
+
+// Pages client (espace mon-compte)
+import MonCompteDashboard from './pages/client/MonCompteDashboard'
+import MesCommandes from './pages/client/MesCommandes'
+import DetailCommandeClient from './pages/client/DetailCommandeClient'
+import MesAvis from './pages/client/MesAvis'
+import MonProfil from './pages/client/MonProfil'
 
 function PageIntrouvable() {
     return (
@@ -73,7 +83,7 @@ function App() {
                     </RouteProtegee>
                 }
             >
-                <Route index element={<PagePlaceholder titre="Tableau de bord" description="Vue d'ensemble de votre activité" />} />
+                <Route index element={<Navigate to="commandes" replace />} />
                 <Route path="commandes" element={<GestionCommandes racine="/employe" />} />
                 <Route path="commandes/:numero" element={<DetailCommande racine="/employe" />} />
                 <Route path="menus" element={<ListeMenus racine="/employe" />} />
@@ -103,8 +113,24 @@ function App() {
                 <Route path="utilisateurs" element={<GestionUtilisateurs />} />
                 <Route path="avis" element={<ModerationAvis racine="/admin" />} />
                 <Route path="horaires" element={<GestionHoraires racine="/admin" />} />
-                <Route path="statistiques" element={<PagePlaceholder titre="Statistiques" />} />
-                <Route path="parametres" element={<PagePlaceholder titre="Paramètres" />} />
+                <Route path="statistiques" element={<Statistiques />} />
+                <Route path="parametres" element={<Parametres />} />
+            </Route>
+
+            {/* ===== ESPACE CLIENT (mon-compte) ===== */}
+            <Route
+                path="/mon-compte"
+                element={
+                    <RouteProtegee rolesAutorises={['utilisateur', 'employe', 'administrateur']}>
+                        <LayoutClient />
+                    </RouteProtegee>
+                }
+            >
+                <Route index element={<MonCompteDashboard />} />
+                <Route path="commandes" element={<MesCommandes />} />
+                <Route path="commandes/:numero" element={<DetailCommandeClient />} />
+                <Route path="avis" element={<MesAvis />} />
+                <Route path="profil" element={<MonProfil />} />
             </Route>
         </Routes>
     )

@@ -1,8 +1,8 @@
 // Tableau de bord admin - vue globale de l'activite.
 // Maquette : KPIs + 2 graphiques + commandes recentes + comptes employes
 
-import { useState, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
     ShoppingCart,
     Euro,
@@ -10,6 +10,7 @@ import {
     Star,
     Plus,
     MoreVertical,
+    Check,
 } from 'lucide-react'
 import {
     BarChart,
@@ -94,6 +95,25 @@ export default function Dashboard() {
     // Chargement
     const [chargement, setChargement] = useState(true)
     const [erreur, setErreur] = useState<string | null>(null)
+
+    // Menu contextuel "3 points" sur les commandes recentes
+    const [menuOuvert, setMenuOuvert] = useState<string | null>(null)
+    const [majStatutEnCours, setMajStatutEnCours] = useState<string | null>(null)
+    const menuRef = useRef<HTMLDivElement | null>(null)
+    const navigate = useNavigate()
+
+    // Fermer le menu si on clique en dehors
+    useEffect(() => {
+        function gererClicExterieur(e: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setMenuOuvert(null)
+            }
+        }
+        if (menuOuvert) {
+            document.addEventListener('mousedown', gererClicExterieur)
+            return () => document.removeEventListener('mousedown', gererClicExterieur)
+        }
+    }, [menuOuvert])
 
     // Premier chargement : on recupere tout en parallele
     useEffect(() => {
@@ -180,6 +200,27 @@ export default function Dashboard() {
         }
         return liste.slice(0, 6)
     }, [commandesRecentes, filtreStatut, filtreRecherche])
+
+    // Changement rapide de statut depuis le menu contextuel
+    async function changerStatutRapide(numero: string, nouveauStatut: string) {
+        try {
+            setMajStatutEnCours(numero)
+            await api.put(`/api/commandes/${numero}/statut`, { statut: nouveauStatut })
+            // Mise a jour locale
+            setCommandesRecentes((prev) =>
+                prev.map((c) =>
+                    c.numero_commande === numero
+                        ? { ...c, statut: nouveauStatut as any }
+                        : c
+                )
+            )
+            setMenuOuvert(null)
+        } catch (err: any) {
+            setErreur(err?.message || 'Impossible de changer le statut.')
+        } finally {
+            setMajStatutEnCours(null)
+        }
+    }
 
     // Donnees pour le donut chart CA par menu (limite a 5 top + autres)
     const donutData = useMemo(() => {
@@ -356,6 +397,18 @@ export default function Dashboard() {
                                     innerRadius={55}
                                     outerRadius={95}
                                     paddingAngle={2}
+                                    label={(props: any) => {
+                                        const total = donutData.reduce(
+                                            (sum, d) => sum + d.chiffreAffaires,
+                                            0
+                                        )
+                                        if (total === 0) return ''
+                                        const pct = (props.value / total) * 100
+                                        // On masque les tranches de moins de 5% pour ne pas surcharger
+                                        if (pct < 5) return ''
+                                        return `${pct.toFixed(0)}%`
+                                    }}
+                                    labelLine={false}
                                 >
                                     {donutData.map((_, idx) => (
                                         <Cell
@@ -365,7 +418,17 @@ export default function Dashboard() {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    formatter={(v: number) => [`${v.toFixed(2)} €`, 'CA']}
+                                    formatter={(v: number) => {
+                                        const total = donutData.reduce(
+                                            (sum, d) => sum + d.chiffreAffaires,
+                                            0
+                                        )
+                                        const pct = total > 0 ? (v / total) * 100 : 0
+                                        return [
+                                            `${v.toFixed(2)} € (${pct.toFixed(1)}%)`,
+                                            'CA',
+                                        ]
+                                    }}
                                     contentStyle={{
                                         background: '#FFFFFF',
                                         border: '1px solid #E8E8E8',
@@ -438,50 +501,120 @@ export default function Dashboard() {
                                     </td>
                                 </tr>
                             ) : (
-                                commandesFiltrees.map((cmd) => (
-                                    <tr key={cmd.numero_commande}>
-                                        <td className="dashboard-table-numero">
-                                            <Link
-                                                to={`/admin/commandes/${cmd.numero_commande}`}
-                                                className="dashboard-table-lien"
+                                commandesFiltrees.map((cmd) => {
+                                    const statutsPossibles: Array<{ key: string; label: string }> = [
+                                        { key: 'en_attente', label: 'En attente' },
+                                        { key: 'accepte', label: 'Accepté' },
+                                        { key: 'en_preparation', label: 'En préparation' },
+                                        { key: 'en_cours_livraison', label: 'En livraison' },
+                                        { key: 'livre', label: 'Livré' },
+                                        { key: 'terminee', label: 'Terminée' },
+                                    ]
+                                    return (
+                                        <tr
+                                            key={cmd.numero_commande}
+                                            className="dashboard-table-row-clickable"
+                                            onClick={() =>
+                                                navigate(`/admin/commandes/${cmd.numero_commande}`)
+                                            }
+                                        >
+                                            <td className="dashboard-table-numero">
+                                                <span className="dashboard-table-lien">
+                                                    {cmd.numero_commande}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {cmd.client_prenom} {cmd.client_nom}
+                                            </td>
+                                            <td>{cmd.menu_titre || '—'}</td>
+                                            <td>
+                                                {cmd.date_prestation
+                                                    ? new Date(cmd.date_prestation).toLocaleDateString('fr-FR', {
+                                                          day: 'numeric',
+                                                          month: 'short',
+                                                          year: 'numeric',
+                                                      })
+                                                    : '—'}
+                                            </td>
+                                            <td className="fw-medium">
+                                                {(
+                                                    Number(cmd.prix_menu || 0) +
+                                                    Number(cmd.prix_livraison || 0)
+                                                ).toFixed(2)}{' '}
+                                                €
+                                            </td>
+                                            <td>
+                                                <BadgeStatut statut={cmd.statut} />
+                                            </td>
+                                            <td
+                                                onClick={(e) => e.stopPropagation()}
+                                                style={{ position: 'relative' }}
                                             >
-                                                {cmd.numero_commande}
-                                            </Link>
-                                        </td>
-                                        <td>
-                                            {cmd.client_prenom} {cmd.client_nom}
-                                        </td>
-                                        <td>{cmd.menu_titre || '—'}</td>
-                                        <td>
-                                            {cmd.date_prestation
-                                                ? new Date(cmd.date_prestation).toLocaleDateString('fr-FR', {
-                                                      day: 'numeric',
-                                                      month: 'short',
-                                                      year: 'numeric',
-                                                  })
-                                                : '—'}
-                                        </td>
-                                        <td className="fw-medium">
-                                            {(
-                                                Number(cmd.prix_menu || 0) +
-                                                Number(cmd.prix_livraison || 0)
-                                            ).toFixed(2)}{' '}
-                                            €
-                                        </td>
-                                        <td>
-                                            <BadgeStatut statut={cmd.statut} />
-                                        </td>
-                                        <td>
-                                            <button
-                                                type="button"
-                                                className="dashboard-table-action"
-                                                aria-label="Actions"
-                                            >
-                                                <MoreVertical size={16} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
+                                                <button
+                                                    type="button"
+                                                    className="dashboard-table-action"
+                                                    aria-label="Changer le statut"
+                                                    aria-haspopup="menu"
+                                                    aria-expanded={menuOuvert === cmd.numero_commande}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setMenuOuvert(
+                                                            menuOuvert === cmd.numero_commande
+                                                                ? null
+                                                                : cmd.numero_commande
+                                                        )
+                                                    }}
+                                                    disabled={majStatutEnCours === cmd.numero_commande}
+                                                >
+                                                    <MoreVertical size={16} />
+                                                </button>
+                                                {menuOuvert === cmd.numero_commande && (
+                                                    <div
+                                                        ref={menuRef}
+                                                        className="dashboard-menu-contextuel"
+                                                        role="menu"
+                                                    >
+                                                        <div className="dashboard-menu-titre">
+                                                            Changer le statut
+                                                        </div>
+                                                        {statutsPossibles.map((s) => (
+                                                            <button
+                                                                key={s.key}
+                                                                type="button"
+                                                                role="menuitem"
+                                                                className={`dashboard-menu-item ${cmd.statut === s.key ? 'dashboard-menu-item--actif' : ''}`}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    if (cmd.statut !== s.key) {
+                                                                        changerStatutRapide(
+                                                                            cmd.numero_commande,
+                                                                            s.key
+                                                                        )
+                                                                    }
+                                                                }}
+                                                                disabled={cmd.statut === s.key}
+                                                            >
+                                                                {cmd.statut === s.key && (
+                                                                    <Check size={12} />
+                                                                )}
+                                                                {s.label}
+                                                            </button>
+                                                        ))}
+                                                        <hr className="dashboard-menu-sep" />
+                                                        <Link
+                                                            to={`/admin/commandes/${cmd.numero_commande}`}
+                                                            className="dashboard-menu-item"
+                                                            role="menuitem"
+                                                            onClick={() => setMenuOuvert(null)}
+                                                        >
+                                                            Voir le détail complet →
+                                                        </Link>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    )
+                                })
                             )}
                         </tbody>
                     </table>

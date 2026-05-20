@@ -197,8 +197,8 @@ export default function DetailCommande({ racine }: Props) {
         try {
             setAnnulationEnCours(true)
             await api.put(`/api/commandes/${numero}/annuler`, {
-                motif: motifAnnulation,
-                modeContact: modeContactAnnulation,
+                motifAnnulation: motifAnnulation,
+                modeContactAnnulation: modeContactAnnulation,
             })
             await charger()
             setMotifAnnulation('')

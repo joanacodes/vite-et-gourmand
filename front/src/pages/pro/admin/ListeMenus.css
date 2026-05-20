@@ -89,6 +89,10 @@
     background-color: var(--color-creme-ivoire);
 }
 
+.lm-row-clickable {
+    cursor: pointer;
+}
+
 .lm-row-rupture {
     background-color: rgba(220, 53, 69, 0.03);
 }

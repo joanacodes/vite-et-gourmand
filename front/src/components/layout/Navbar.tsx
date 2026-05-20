@@ -34,9 +34,13 @@ export default function Navbar() {
 
                 {utilisateur ? (
                     <div className="d-flex align-items-center gap-3">
-                        <span className="text-white d-none d-sm-inline">
+                        <Link
+                            to="/mon-compte"
+                            className="text-white d-none d-sm-inline text-decoration-none"
+                            title="Mon compte"
+                        >
                             Bonjour {utilisateur.prenom}
-                        </span>
+                        </Link>
                         {lienEspacePro && (
                             <Link to={lienEspacePro} className="navbar-bouton-espacepro">
                                 Mon espace

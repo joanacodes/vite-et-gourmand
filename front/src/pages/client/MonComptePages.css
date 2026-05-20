@@ -1,0 +1,646 @@
+/* Pages "mon-compte" cote client */
+
+.mc-page {
+    min-width: 0;
+}
+
+.mc-titre {
+    font-size: 1.75rem;
+    color: var(--color-bordeaux);
+    margin: 0 0 4px 0;
+}
+
+.mc-sous-titre {
+    color: var(--color-gris-texte);
+    margin: 0 0 var(--space-lg) 0;
+}
+
+.mc-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: var(--space-md);
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+}
+
+.mc-breadcrumb a {
+    color: var(--color-gris-texte);
+    text-decoration: none;
+}
+
+.mc-breadcrumb a:hover {
+    color: var(--color-bordeaux);
+}
+
+.mc-breadcrumb span {
+    color: var(--color-bordeaux);
+    font-weight: 500;
+}
+
+/* ============ KPIs ============ */
+.mc-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.mc-kpi {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.mc-kpi-icone {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background-color: rgba(123, 45, 38, 0.1);
+    color: var(--color-bordeaux);
+    padding: 10px;
+    flex-shrink: 0;
+}
+
+.mc-kpi--sauge .mc-kpi-icone {
+    background-color: rgba(62, 92, 74, 0.1);
+    color: var(--color-vert-sauge);
+}
+
+.mc-kpi--bleu .mc-kpi-icone {
+    background-color: rgba(31, 58, 95, 0.1);
+    color: var(--color-bleu-nuit);
+}
+
+.mc-kpi-valeur {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-anthracite);
+    line-height: 1;
+}
+
+.mc-kpi-label {
+    font-size: var(--text-sm);
+    color: var(--color-gris-texte);
+}
+
+/* ============ CARTES ============ */
+.mc-carte {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+.mc-carte-titre {
+    color: var(--color-bordeaux);
+    font-size: 1.125rem;
+    margin: 0 0 var(--space-md) 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Prochaine commande */
+.mc-prochaine {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.mc-prochaine-menu {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--color-anthracite);
+}
+
+.mc-prochaine-meta {
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ============ ACTIONS RAPIDES ============ */
+.mc-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+}
+
+.mc-action-carte {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    text-decoration: none;
+    color: var(--color-anthracite);
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+}
+
+.mc-action-carte:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    color: var(--color-anthracite);
+}
+
+.mc-action-carte h3 {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--color-bordeaux);
+    margin: 0 0 6px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mc-action-carte p {
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    margin: 0;
+}
+
+/* ============ ONGLETS ============ */
+.mc-onglets {
+    display: flex;
+    gap: 4px;
+    margin-bottom: var(--space-lg);
+    background-color: var(--color-blanc);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    width: fit-content;
+    flex-wrap: wrap;
+}
+
+.mc-onglet {
+    background: transparent;
+    border: none;
+    padding: 8px 18px;
+    border-radius: var(--radius-md);
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.mc-onglet:hover {
+    color: var(--color-bordeaux);
+}
+
+.mc-onglet--actif {
+    background-color: var(--color-bordeaux);
+    color: var(--color-blanc);
+}
+
+.mc-onglet--actif:hover {
+    color: var(--color-blanc);
+}
+
+/* ============ COMMANDES ============ */
+.mc-commandes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.mc-commande-carte {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    text-decoration: none;
+    color: var(--color-anthracite);
+    transition: all var(--transition-fast);
+    flex-wrap: wrap;
+}
+
+.mc-commande-carte:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+    color: var(--color-anthracite);
+}
+
+.mc-commande-numero {
+    font-family: 'Courier New', monospace;
+    color: var(--color-gris-texte);
+    font-size: var(--text-xs);
+}
+
+.mc-commande-menu {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--color-anthracite);
+    margin: 4px 0;
+}
+
+.mc-commande-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-gris-texte);
+    font-size: var(--text-xs);
+}
+
+.mc-commande-droite {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.mc-commande-prix {
+    font-weight: 700;
+    color: var(--color-bordeaux);
+    font-size: var(--text-md);
+}
+
+.mc-commande-fleche {
+    color: var(--color-gris-texte);
+}
+
+/* ============ ETAT VIDE ============ */
+.mc-vide {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-md);
+    color: var(--color-gris-texte);
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+}
+
+.mc-vide svg {
+    color: var(--color-gris-clair);
+    margin-bottom: var(--space-md);
+}
+
+.mc-vide h3 {
+    color: var(--color-anthracite);
+    margin-bottom: 6px;
+}
+
+.mc-vide p {
+    margin: 0;
+}
+
+/* ============ BADGES STATUT ============ */
+.mc-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.mc-badge--lg {
+    padding: 6px 14px;
+    font-size: var(--text-sm);
+}
+
+.mc-badge--en-attente { background-color: #DBEAFE; color: #1D4ED8; }
+.mc-badge--accepte { background-color: #86EFAC; color: #15803D; }
+.mc-badge--en-preparation { background-color: #FFF4E6; color: #E07A5F; }
+.mc-badge--en-cours-livraison { background-color: #93C5FD; color: #1D4ED8; }
+.mc-badge--livre { background-color: #22C55E; color: var(--color-blanc); }
+.mc-badge--attente-retour-materiel { background-color: #FCE8EF; color: #5C1032; }
+.mc-badge--terminee { background-color: #F3F4F6; color: #111827; }
+.mc-badge--annulee { background-color: #FFE8E8; color: #D4183D; }
+
+/* ============ DETAIL COMMANDE CLIENT ============ */
+.mc-detail-entete {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-lg);
+}
+
+.mc-grille-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+.mc-col-full {
+    grid-column: 1 / -1;
+}
+
+.mc-info-item {
+    display: flex;
+    gap: 10px;
+    color: var(--color-gris-texte);
+}
+
+.mc-info-item svg {
+    color: var(--color-bordeaux);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.mc-info-label {
+    font-size: var(--text-xs);
+    color: var(--color-gris-texte);
+    font-weight: 500;
+}
+
+.mc-info-valeur {
+    color: var(--color-anthracite);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.mc-notes-bloc {
+    background-color: var(--color-creme-ivoire);
+    border-left: 3px solid var(--color-bordeaux);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-md);
+}
+
+.mc-notes-contenu {
+    color: var(--color-anthracite);
+    margin: 4px 0 0 0;
+    font-style: italic;
+}
+
+/* Recap */
+.mc-recap hr {
+    border: none;
+    border-top: 1px solid var(--color-gris-clair);
+    margin: var(--space-sm) 0;
+}
+
+.mc-recap-ligne {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+}
+
+.mc-recap-ligne strong {
+    color: var(--color-anthracite);
+    font-weight: 600;
+}
+
+.mc-recap-total span,
+.mc-recap-total strong {
+    color: var(--color-anthracite);
+    font-size: var(--text-md);
+    font-weight: 700;
+}
+
+.mc-recap-total strong {
+    color: var(--color-bordeaux);
+    font-size: 1.25rem;
+}
+
+/* Historique */
+.mc-historique {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    position: relative;
+}
+
+.mc-historique-entree {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.mc-historique-pastille {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-gris-clair);
+    color: var(--color-gris-texte);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+}
+
+.mc-historique-actuel .mc-historique-pastille {
+    background-color: var(--color-vert-succes);
+    color: var(--color-blanc);
+}
+
+.mc-historique-date {
+    color: var(--color-gris-texte);
+    font-size: var(--text-xs);
+    margin-top: 2px;
+}
+
+/* Annulation */
+.mc-carte-annulation {
+    border-left: 4px solid var(--color-rouge-erreur);
+}
+
+.mc-titre-annulation {
+    color: var(--color-rouge-erreur) !important;
+}
+
+/* CTA Avis */
+.mc-cta-avis {
+    background: linear-gradient(135deg, rgba(245, 200, 74, 0.15), rgba(123, 45, 38, 0.06));
+    border: 1px solid rgba(245, 200, 74, 0.4);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.mc-cta-avis strong {
+    display: block;
+    color: var(--color-anthracite);
+    font-size: var(--text-md);
+}
+
+.mc-cta-avis p {
+    color: var(--color-gris-texte);
+    margin: 4px 0 0 0;
+    font-size: var(--text-sm);
+}
+
+.mc-avis-info {
+    background-color: rgba(245, 200, 74, 0.1);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-sm);
+    color: var(--color-anthracite);
+}
+
+/* Stars input avis */
+.mc-stars-input {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mc-star-bouton {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.mc-stars-valeur {
+    margin-left: 8px;
+    font-weight: 600;
+    color: var(--color-anthracite);
+}
+
+/* ============ MES AVIS ============ */
+.mc-avis-liste {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.mc-avis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.mc-stars-affichage {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.mc-avis-menu {
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.mc-avis-menu strong {
+    color: var(--color-anthracite);
+}
+
+.mc-avis-lien {
+    color: var(--color-bordeaux);
+    text-decoration: none;
+    margin-left: 4px;
+}
+
+.mc-avis-lien:hover {
+    text-decoration: underline;
+}
+
+.mc-avis-texte {
+    color: var(--color-anthracite);
+    font-style: italic;
+    margin: 0 0 var(--space-sm) 0;
+    line-height: 1.6;
+}
+
+.mc-avis-date {
+    color: var(--color-gris-texte);
+    font-size: var(--text-xs);
+}
+
+.mc-badge-avis {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 500;
+}
+
+.mc-badge-avis--en_attente {
+    background-color: #DBEAFE;
+    color: #1D4ED8;
+}
+.mc-badge-avis--valide {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--color-vert-succes);
+}
+.mc-badge-avis--refuse {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--color-rouge-erreur);
+}
+
+/* ============ MODALES ============ */
+.mc-modale-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    padding: var(--space-md);
+}
+
+.mc-modale {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+}
+
+.mc-modale h3 {
+    color: var(--color-bordeaux);
+    margin-bottom: var(--space-md);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 991px) {
+    .mc-kpis {
+        grid-template-columns: 1fr;
+    }
+    .mc-actions {
+        grid-template-columns: 1fr;
+    }
+    .mc-grille-2col {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 575px) {
+    .mc-titre {
+        font-size: 1.5rem;
+    }
+    .mc-commande-carte {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .mc-commande-droite {
+        justify-content: space-between;
+        width: 100%;
+    }
+}

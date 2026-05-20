@@ -30,6 +30,7 @@ import routesStats from "./routes/stats";
 import routesContact from "./routes/contact";
 import routesHoraires from "./routes/horaire";
 import routesReference from "./routes/reference";
+import routesParametres from "./routes/parametre";
 import { demarrerCronAnonymisation } from "./services/cronAnonymisation";
 
 // On charge les variables du fichier .env
@@ -121,6 +122,9 @@ app.use("/api/stats", routesStats);
 
 // Donnees de reference (themes, regimes, allergenes)
 app.use("/api", routesReference);
+
+// Parametres de l'application
+app.use("/api/parametres", routesParametres);
 
 // Route du formulaire de contact : /api/contact (avec limiteur)
 app.use("/api/contact", limiteurContact, routesContact);

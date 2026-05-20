@@ -1,0 +1,167 @@
+/* Page Statistiques */
+
+.statistiques {
+    max-width: 1400px;
+}
+
+.s-titre {
+    font-size: 2rem;
+    color: var(--color-bordeaux);
+    margin: 0 0 4px 0;
+}
+
+.s-sous-titre {
+    color: var(--color-gris-texte);
+    margin: 0 0 var(--space-lg) 0;
+}
+
+/* KPIs */
+.s-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.s-kpi {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.s-kpi-icone {
+    width: 44px;
+    height: 44px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background-color: rgba(123, 45, 38, 0.1);
+    color: var(--color-bordeaux);
+    flex-shrink: 0;
+}
+
+.s-kpi-label {
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+}
+
+.s-kpi-valeur {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-anthracite);
+}
+
+/* Cartes */
+.s-carte {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+.s-carte-titre {
+    color: var(--color-bordeaux);
+    font-size: 1.125rem;
+    margin: 0 0 var(--space-md) 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Table clients fideles */
+.s-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.s-table thead th {
+    padding: 12px;
+    text-align: left;
+    color: var(--color-gris-texte);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--color-gris-clair);
+}
+
+.s-table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid var(--color-gris-clair);
+    vertical-align: middle;
+    font-size: var(--text-sm);
+}
+
+.s-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.s-rang {
+    font-size: 1.25rem;
+    width: 40px;
+}
+
+.s-client-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.s-client-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-bordeaux);
+    color: var(--color-blanc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: var(--text-xs);
+    flex-shrink: 0;
+}
+
+.s-montant {
+    color: var(--color-bordeaux);
+    font-weight: 700;
+}
+
+/* Note moyenne XXL */
+.s-note-moyenne {
+    text-align: center;
+}
+
+.s-note-grande {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    margin: var(--space-md) 0 var(--space-sm);
+}
+
+.s-note-chiffre {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--color-bordeaux);
+    line-height: 1;
+}
+
+.s-note-sur {
+    font-size: 1.5rem;
+    color: var(--color-gris-texte);
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .s-kpis {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 575px) {
+    .s-titre {
+        font-size: 1.5rem;
+    }
+}

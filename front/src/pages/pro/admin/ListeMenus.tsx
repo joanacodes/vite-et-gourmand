@@ -2,7 +2,7 @@
 // KPIs + filtres + table avec actions CRUD.
 
 import { useState, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
     Plus,
     Pencil,
@@ -29,6 +29,7 @@ interface Props {
 }
 
 export default function ListeMenus({ racine }: Props) {
+    const navigate = useNavigate()
     const [menus, setMenus] = useState<Menu[]>([])
     const [themes, setThemes] = useState<Theme[]>([])
     const [chargement, setChargement] = useState(true)
@@ -279,9 +280,10 @@ export default function ListeMenus({ racine }: Props) {
                                     return (
                                         <tr
                                             key={menu.menu_id}
-                                            className={enRupture ? 'lm-row-rupture' : ''}
+                                            className={`lm-row-clickable ${enRupture ? 'lm-row-rupture' : ''}`}
+                                            onClick={() => navigate(`${racine}/menus/${menu.menu_id}`)}
                                         >
-                                            <td>
+                                            <td onClick={(e) => e.stopPropagation()}>
                                                 <input
                                                     type="checkbox"
                                                     aria-label={`Sélectionner ${menu.titre}`}
@@ -300,12 +302,9 @@ export default function ListeMenus({ racine }: Props) {
                                             </td>
                                             <td>
                                                 <div className="lm-nom">
-                                                    <Link
-                                                        to={`${racine}/menus/${menu.menu_id}`}
-                                                        className="lm-nom-lien"
-                                                    >
+                                                    <strong className="lm-nom-lien">
                                                         {menu.titre}
-                                                    </Link>
+                                                    </strong>
                                                     <div className="lm-nom-meta">
                                                         {menu.plats?.length || 0} plats •{' '}
                                                         {menu.description?.slice(0, 50)}
@@ -334,7 +333,7 @@ export default function ListeMenus({ racine }: Props) {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td>
+                                            <td onClick={(e) => e.stopPropagation()}>
                                                 <label className="form-switch lm-switch">
                                                     <input
                                                         type="checkbox"
@@ -345,7 +344,7 @@ export default function ListeMenus({ racine }: Props) {
                                                     />
                                                 </label>
                                             </td>
-                                            <td>
+                                            <td onClick={(e) => e.stopPropagation()}>
                                                 <div className="d-flex gap-2">
                                                     <Link
                                                         to={`${racine}/menus/${menu.menu_id}`}
