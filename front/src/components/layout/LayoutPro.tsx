@@ -78,6 +78,7 @@ export default function LayoutPro({ espace }: Props) {
         { chemin: `${racine}/menus`, label: 'Menus', icone: <UtensilsCrossed size={18} /> },
         { chemin: `${racine}/plats`, label: 'Plats', icone: <Soup size={18} /> },
         { chemin: `${racine}/commandes`, label: 'Commandes', icone: <ClipboardList size={18} />, badge: nbCommandesEnAttente },
+        { chemin: `${racine}/horaires`, label: 'Horaires', icone: <Clock size={18} /> },
         { chemin: `${racine}/utilisateurs`, label: 'Utilisateurs', icone: <Users size={18} /> },
         { chemin: `${racine}/avis`, label: 'Avis', icone: <Star size={18} />, badge: nbAvisEnAttente },
         { chemin: `${racine}/statistiques`, label: 'Statistiques', icone: <BarChart3 size={18} /> },

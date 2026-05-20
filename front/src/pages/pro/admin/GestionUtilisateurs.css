@@ -1,0 +1,254 @@
+/* Gestion utilisateurs */
+
+.gestion-utilisateurs {
+    max-width: 1400px;
+}
+
+.gu-entete {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-lg);
+}
+
+.gu-titre {
+    font-size: 2rem;
+    color: var(--color-bordeaux);
+    margin: 0 0 4px 0;
+}
+
+.gu-sous-titre {
+    color: var(--color-gris-texte);
+    margin: 0;
+}
+
+/* Pilules */
+.gu-pilules {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-lg);
+}
+
+.gu-pilule {
+    background-color: var(--color-blanc);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--color-gris-texte);
+    box-shadow: var(--shadow-sm);
+}
+
+.gu-pilule strong {
+    color: var(--color-anthracite);
+    margin-right: 6px;
+    font-size: var(--text-md);
+}
+
+.gu-pilule--bordeaux strong { color: var(--color-bordeaux); }
+.gu-pilule--sauge strong { color: var(--color-vert-sauge); }
+.gu-pilule--bleu strong { color: var(--color-bleu-nuit); }
+
+/* Filtres */
+.gu-filtres {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.gu-filtre-recherche {
+    position: relative;
+}
+
+.gu-filtre-icone {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-gris-texte);
+    pointer-events: none;
+}
+
+.gu-filtre-recherche .form-control {
+    padding-left: 36px;
+}
+
+/* Table */
+.gu-table-bloc {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.gu-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.gu-table thead th {
+    padding: 14px 16px;
+    background-color: var(--color-creme-ivoire);
+    text-align: left;
+    color: var(--color-gris-texte);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--color-gris-clair);
+}
+
+.gu-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-gris-clair);
+    color: var(--color-anthracite);
+    font-size: var(--text-sm);
+    vertical-align: middle;
+}
+
+.gu-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.gu-row-inactif {
+    opacity: 0.6;
+}
+
+/* Cellule utilisateur (avatar + nom) */
+.gu-utilisateur {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gu-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-bordeaux);
+    color: var(--color-blanc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: var(--text-sm);
+    flex-shrink: 0;
+}
+
+.gu-email {
+    color: var(--color-gris-texte);
+}
+
+/* Badges role */
+.gu-badge-role {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 500;
+}
+
+.gu-badge-role--administrateur {
+    background-color: rgba(123, 45, 38, 0.1);
+    color: var(--color-bordeaux);
+}
+.gu-badge-role--employe {
+    background-color: rgba(62, 92, 74, 0.1);
+    color: var(--color-vert-sauge);
+}
+.gu-badge-role--utilisateur {
+    background-color: rgba(31, 58, 95, 0.1);
+    color: var(--color-bleu-nuit);
+}
+
+/* Statut */
+.gu-statut {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 500;
+}
+
+.gu-statut--actif {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--color-vert-succes);
+}
+
+.gu-statut--inactif {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: #6C757D;
+}
+
+.gu-table-footer {
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    border-top: 1px solid var(--color-gris-clair);
+}
+
+/* Modale */
+.gu-modale-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    padding: var(--space-md);
+}
+
+.gu-modale {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+}
+
+.gu-modale h3 {
+    color: var(--color-bordeaux);
+    margin-bottom: var(--space-sm);
+}
+
+.gu-mdp-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--color-gris-texte);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.gu-mdp-toggle:hover {
+    color: var(--color-bordeaux);
+}
+
+/* Responsive */
+@media (max-width: 1199px) {
+    .gu-filtres {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .gu-titre {
+        font-size: 1.5rem;
+    }
+    .gu-filtres {
+        grid-template-columns: 1fr;
+    }
+    .gu-email {
+        word-break: break-all;
+        font-size: var(--text-xs);
+    }
+}

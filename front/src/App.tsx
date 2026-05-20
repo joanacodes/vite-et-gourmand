@@ -19,8 +19,12 @@ import PagePlaceholder from './pages/pro/PagePlaceholder'
 import DashboardAdmin from './pages/pro/admin/Dashboard'
 import ListeMenus from './pages/pro/admin/ListeMenus'
 import FormulaireMenu from './pages/pro/admin/FormulaireMenu'
+import GestionUtilisateurs from './pages/pro/admin/GestionUtilisateurs'
 import GestionCommandes from './pages/pro/GestionCommandes'
 import DetailCommande from './pages/pro/DetailCommande'
+import GestionPlats from './pages/pro/GestionPlats'
+import GestionHoraires from './pages/pro/GestionHoraires'
+import ModerationAvis from './pages/pro/ModerationAvis'
 
 function PageIntrouvable() {
     return (
@@ -75,9 +79,9 @@ function App() {
                 <Route path="menus" element={<ListeMenus racine="/employe" />} />
                 <Route path="menus/nouveau" element={<FormulaireMenu racine="/employe" mode="creation" />} />
                 <Route path="menus/:id" element={<FormulaireMenu racine="/employe" mode="edition" />} />
-                <Route path="plats" element={<PagePlaceholder titre="Gestion des plats" />} />
-                <Route path="horaires" element={<PagePlaceholder titre="Horaires" />} />
-                <Route path="avis" element={<PagePlaceholder titre="Modération des avis" />} />
+                <Route path="plats" element={<GestionPlats racine="/employe" />} />
+                <Route path="horaires" element={<GestionHoraires racine="/employe" />} />
+                <Route path="avis" element={<ModerationAvis racine="/employe" />} />
             </Route>
 
             {/* ===== ESPACE ADMIN ===== */}
@@ -93,11 +97,12 @@ function App() {
                 <Route path="menus" element={<ListeMenus racine="/admin" />} />
                 <Route path="menus/nouveau" element={<FormulaireMenu racine="/admin" mode="creation" />} />
                 <Route path="menus/:id" element={<FormulaireMenu racine="/admin" mode="edition" />} />
-                <Route path="plats" element={<PagePlaceholder titre="Gestion des plats" />} />
+                <Route path="plats" element={<GestionPlats racine="/admin" />} />
                 <Route path="commandes" element={<GestionCommandes racine="/admin" />} />
                 <Route path="commandes/:numero" element={<DetailCommande racine="/admin" />} />
-                <Route path="utilisateurs" element={<PagePlaceholder titre="Utilisateurs" />} />
-                <Route path="avis" element={<PagePlaceholder titre="Modération des avis" />} />
+                <Route path="utilisateurs" element={<GestionUtilisateurs />} />
+                <Route path="avis" element={<ModerationAvis racine="/admin" />} />
+                <Route path="horaires" element={<GestionHoraires racine="/admin" />} />
                 <Route path="statistiques" element={<PagePlaceholder titre="Statistiques" />} />
                 <Route path="parametres" element={<PagePlaceholder titre="Paramètres" />} />
             </Route>

@@ -1,0 +1,240 @@
+/* Gestion des plats */
+
+.gestion-plats {
+    max-width: 1400px;
+}
+
+.gp-entete {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-lg);
+}
+
+.gp-titre {
+    font-size: 2rem;
+    color: var(--color-bordeaux);
+    margin: 0 0 4px 0;
+}
+
+.gp-sous-titre {
+    color: var(--color-gris-texte);
+    margin: 0;
+}
+
+.gp-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.gp-filtres {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.gp-filtre-recherche {
+    position: relative;
+}
+
+.gp-filtre-icone {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-gris-texte);
+    pointer-events: none;
+}
+
+.gp-filtre-recherche .form-control {
+    padding-left: 36px;
+}
+
+/* Table */
+.gp-table-bloc {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.gp-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.gp-table thead th {
+    padding: 14px 16px;
+    background-color: var(--color-creme-ivoire);
+    text-align: left;
+    color: var(--color-gris-texte);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--color-gris-clair);
+}
+
+.gp-table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.gp-table tbody tr:hover {
+    background-color: var(--color-creme-ivoire);
+}
+
+.gp-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-gris-clair);
+    color: var(--color-anthracite);
+    font-size: var(--text-sm);
+    vertical-align: middle;
+}
+
+.gp-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Badges type */
+.gp-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 500;
+}
+
+.gp-badge--entree { background-color: rgba(62, 92, 74, 0.1); color: var(--color-vert-sauge); }
+.gp-badge--plat { background-color: rgba(123, 45, 38, 0.1); color: var(--color-bordeaux); }
+.gp-badge--dessert { background-color: rgba(201, 168, 117, 0.2); color: #B7791F; }
+
+/* Chips allergenes */
+.gp-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.gp-chip {
+    background-color: rgba(220, 53, 69, 0.08);
+    color: var(--color-rouge-erreur);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+}
+
+/* Actions */
+.gp-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.gp-action-modifier { color: var(--color-bordeaux); }
+.gp-action-modifier:hover { background-color: rgba(123, 45, 38, 0.1); }
+
+.gp-action-supprimer { color: var(--color-rouge-erreur); }
+.gp-action-supprimer:hover { background-color: rgba(220, 53, 69, 0.1); }
+
+.gp-table-footer {
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    border-top: 1px solid var(--color-gris-clair);
+}
+
+/* Allergenes dans modale */
+.gp-allergenes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.gp-allergene-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-blanc);
+    color: var(--color-anthracite);
+    border: 1px solid var(--color-gris-clair);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.gp-allergene-chip input {
+    margin: 0;
+}
+
+.gp-allergene-chip:hover {
+    border-color: var(--color-bordeaux);
+}
+
+.gp-allergene-chip--actif {
+    background-color: rgba(123, 45, 38, 0.08);
+    border-color: var(--color-bordeaux);
+    color: var(--color-bordeaux);
+}
+
+/* Modale */
+.gp-modale-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    padding: var(--space-md);
+}
+
+.gp-modale {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+}
+
+.gp-modale h3 {
+    color: var(--color-bordeaux);
+    margin-bottom: var(--space-md);
+}
+
+/* Responsive */
+@media (max-width: 1199px) {
+    .gp-kpis {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .gp-filtres {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .gp-titre {
+        font-size: 1.5rem;
+    }
+    .gp-kpis {
+        grid-template-columns: 1fr;
+    }
+    .gp-filtres {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,214 @@
+/* Moderation des avis */
+
+.moderation-avis {
+    max-width: 1100px;
+}
+
+.ma-entete {
+    margin-bottom: var(--space-lg);
+}
+
+.ma-titre {
+    font-size: 2rem;
+    color: var(--color-bordeaux);
+    margin: 0 0 4px 0;
+}
+
+.ma-sous-titre {
+    color: var(--color-gris-texte);
+    margin: 0;
+}
+
+/* Onglets */
+.ma-onglets {
+    display: flex;
+    gap: 4px;
+    margin-bottom: var(--space-lg);
+    background-color: var(--color-blanc);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    width: fit-content;
+}
+
+.ma-onglet {
+    background: transparent;
+    border: none;
+    padding: 8px 18px;
+    border-radius: var(--radius-md);
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.ma-onglet:hover {
+    color: var(--color-bordeaux);
+}
+
+.ma-onglet--actif {
+    background-color: var(--color-bordeaux);
+    color: var(--color-blanc);
+}
+
+.ma-onglet--actif:hover {
+    color: var(--color-blanc);
+}
+
+/* Etat vide */
+.ma-vide {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-md);
+    color: var(--color-gris-texte);
+}
+
+.ma-vide svg {
+    color: var(--color-gris-clair);
+    margin-bottom: var(--space-md);
+}
+
+.ma-vide h3 {
+    color: var(--color-anthracite);
+    margin-bottom: 8px;
+}
+
+.ma-vide p {
+    margin: 0;
+}
+
+/* Cartes d'avis */
+.ma-liste {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.ma-carte {
+    background: var(--color-blanc);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-lg);
+}
+
+.ma-carte-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.ma-auteur {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.ma-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-bordeaux);
+    color: var(--color-blanc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.ma-auteur strong {
+    color: var(--color-anthracite);
+    display: block;
+}
+
+.ma-meta {
+    color: var(--color-gris-texte);
+    font-size: var(--text-xs);
+    margin-top: 2px;
+}
+
+/* Note etoiles */
+.ma-note {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.ma-note-valeur {
+    margin-left: 8px;
+    color: var(--color-anthracite);
+    font-weight: 600;
+    font-size: var(--text-sm);
+}
+
+.ma-menu-info {
+    color: var(--color-gris-texte);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.ma-menu-info strong {
+    color: var(--color-anthracite);
+}
+
+.ma-commentaire {
+    background-color: var(--color-creme-ivoire);
+    border-left: 3px solid var(--color-bordeaux);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    color: var(--color-anthracite);
+    font-style: italic;
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+}
+
+.ma-pied {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.ma-date {
+    color: var(--color-gris-texte);
+    font-size: var(--text-xs);
+}
+
+/* Boutons d'action */
+.btn-outline-danger {
+    color: var(--color-rouge-erreur);
+    border: 1px solid var(--color-rouge-erreur);
+    background: transparent;
+    transition: all var(--transition-fast);
+}
+
+.btn-outline-danger:hover:not(:disabled) {
+    background-color: var(--color-rouge-erreur);
+    color: var(--color-blanc);
+}
+
+.btn-success {
+    background-color: var(--color-vert-succes);
+    color: var(--color-blanc);
+    border: 1px solid var(--color-vert-succes);
+}
+
+.btn-success:hover:not(:disabled) {
+    background-color: #157A2F;
+    border-color: #157A2F;
+    color: var(--color-blanc);
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .ma-titre {
+        font-size: 1.5rem;
+    }
+    .ma-carte-header {
+        flex-direction: column;
+    }
+}
