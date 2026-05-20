@@ -17,6 +17,8 @@ import ReinitialiserMotDePasse from './pages/auth/ReinitialiserMotDePasse'
 
 import PagePlaceholder from './pages/pro/PagePlaceholder'
 import DashboardAdmin from './pages/pro/admin/Dashboard'
+import ListeMenus from './pages/pro/admin/ListeMenus'
+import FormulaireMenu from './pages/pro/admin/FormulaireMenu'
 import GestionCommandes from './pages/pro/GestionCommandes'
 import DetailCommande from './pages/pro/DetailCommande'
 
@@ -70,7 +72,9 @@ function App() {
                 <Route index element={<PagePlaceholder titre="Tableau de bord" description="Vue d'ensemble de votre activité" />} />
                 <Route path="commandes" element={<GestionCommandes racine="/employe" />} />
                 <Route path="commandes/:numero" element={<DetailCommande racine="/employe" />} />
-                <Route path="menus" element={<PagePlaceholder titre="Gestion des menus" />} />
+                <Route path="menus" element={<ListeMenus racine="/employe" />} />
+                <Route path="menus/nouveau" element={<FormulaireMenu racine="/employe" mode="creation" />} />
+                <Route path="menus/:id" element={<FormulaireMenu racine="/employe" mode="edition" />} />
                 <Route path="plats" element={<PagePlaceholder titre="Gestion des plats" />} />
                 <Route path="horaires" element={<PagePlaceholder titre="Horaires" />} />
                 <Route path="avis" element={<PagePlaceholder titre="Modération des avis" />} />
@@ -86,9 +90,9 @@ function App() {
                 }
             >
                 <Route index element={<DashboardAdmin />} />
-                <Route path="menus" element={<PagePlaceholder titre="Gestion des menus" />} />
-                <Route path="menus/nouveau" element={<PagePlaceholder titre="Créer un menu" />} />
-                <Route path="menus/:id" element={<PagePlaceholder titre="Modifier un menu" />} />
+                <Route path="menus" element={<ListeMenus racine="/admin" />} />
+                <Route path="menus/nouveau" element={<FormulaireMenu racine="/admin" mode="creation" />} />
+                <Route path="menus/:id" element={<FormulaireMenu racine="/admin" mode="edition" />} />
                 <Route path="plats" element={<PagePlaceholder titre="Gestion des plats" />} />
                 <Route path="commandes" element={<GestionCommandes racine="/admin" />} />
                 <Route path="commandes/:numero" element={<DetailCommande racine="/admin" />} />
