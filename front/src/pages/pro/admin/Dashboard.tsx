@@ -28,6 +28,7 @@ import {
 import { api } from '../../../services/api'
 import type { Commande } from '../../../types'
 import KpiCarte from '../../../components/admin/KpiCarte'
+import { useEstMobile } from '../../../hooks/useEstMobile'
 import './Dashboard.css'
 
 // Type local : ce que renvoie GET /api/utilisateurs (snake_case)
@@ -101,6 +102,7 @@ export default function Dashboard() {
     const [majStatutEnCours, setMajStatutEnCours] = useState<string | null>(null)
     const menuRef = useRef<HTMLDivElement | null>(null)
     const navigate = useNavigate()
+    const estMobile = useEstMobile()
 
     // Fermer le menu si on clique en dehors
     useEffect(() => {
@@ -315,11 +317,15 @@ export default function Dashboard() {
                             Aucune commande pour la période sélectionnée.
                         </p>
                     ) : (
-                        <ResponsiveContainer width="100%" height={300}>
+                        <ResponsiveContainer
+                            width="100%"
+                            height={Math.max(300, commandesParMenu.length * 60)}
+                        >
                             <BarChart
                                 data={commandesParMenu}
                                 layout="vertical"
                                 margin={{ top: 8, right: 24, left: 16, bottom: 8 }}
+                                barCategoryGap="20%"
                             >
                                 <CartesianGrid strokeDasharray="3 3" stroke="#E8E8E8" />
                                 <XAxis type="number" stroke="#6B7280" fontSize={12} />
@@ -388,7 +394,7 @@ export default function Dashboard() {
                             Aucun chiffre d'affaires pour la période sélectionnée.
                         </p>
                     ) : (
-                        <ResponsiveContainer width="100%" height={300}>
+                        <ResponsiveContainer width="100%" height={estMobile ? 380 : 300}>
                             <PieChart>
                                 <Pie
                                     data={donutData}
@@ -436,9 +442,9 @@ export default function Dashboard() {
                                     }}
                                 />
                                 <Legend
-                                    layout="vertical"
-                                    align="right"
-                                    verticalAlign="middle"
+                                    layout={estMobile ? 'horizontal' : 'vertical'}
+                                    align={estMobile ? 'center' : 'right'}
+                                    verticalAlign={estMobile ? 'bottom' : 'middle'}
                                     iconType="circle"
                                     wrapperStyle={{ fontSize: 12 }}
                                 />
@@ -481,7 +487,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="table-responsive">
-                    <table className="dashboard-table">
+                    <table className="dashboard-table table-cartes">
                         <thead>
                             <tr>
                                 <th>N° commande</th>
@@ -518,16 +524,16 @@ export default function Dashboard() {
                                                 navigate(`/admin/commandes/${cmd.numero_commande}`)
                                             }
                                         >
-                                            <td className="dashboard-table-numero">
+                                            <td data-label="N° commande" className="dashboard-table-numero">
                                                 <span className="dashboard-table-lien">
                                                     {cmd.numero_commande}
                                                 </span>
                                             </td>
-                                            <td>
+                                            <td data-label="Client">
                                                 {cmd.client_prenom} {cmd.client_nom}
                                             </td>
-                                            <td>{cmd.menu_titre || '—'}</td>
-                                            <td>
+                                            <td data-label="Menu">{cmd.menu_titre || '—'}</td>
+                                            <td data-label="Date prestation">
                                                 {cmd.date_prestation
                                                     ? new Date(cmd.date_prestation).toLocaleDateString('fr-FR', {
                                                           day: 'numeric',
@@ -536,17 +542,18 @@ export default function Dashboard() {
                                                       })
                                                     : '—'}
                                             </td>
-                                            <td className="fw-medium">
+                                            <td data-label="Montant" className="fw-medium">
                                                 {(
                                                     Number(cmd.prix_menu || 0) +
                                                     Number(cmd.prix_livraison || 0)
                                                 ).toFixed(2)}{' '}
                                                 €
                                             </td>
-                                            <td>
+                                            <td data-label="Statut">
                                                 <BadgeStatut statut={cmd.statut} />
                                             </td>
                                             <td
+                                                className="td-actions"
                                                 onClick={(e) => e.stopPropagation()}
                                                 style={{ position: 'relative' }}
                                             >
@@ -632,7 +639,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="table-responsive">
-                    <table className="dashboard-table">
+                    <table className="dashboard-table table-cartes">
                         <thead>
                             <tr>
                                 <th>Email</th>
@@ -652,11 +659,11 @@ export default function Dashboard() {
                             ) : (
                                 employes.slice(0, 5).map((emp) => (
                                     <tr key={emp.utilisateur_id}>
-                                        <td>{emp.email}</td>
-                                        <td>
+                                        <td data-label="Email">{emp.email}</td>
+                                        <td data-label="Nom">
                                             {emp.prenom} {emp.nom}
                                         </td>
-                                        <td>
+                                        <td data-label="Date création">
                                             {emp.date_creation
                                                 ? new Date(emp.date_creation).toLocaleDateString('fr-FR', {
                                                       day: '2-digit',
@@ -665,7 +672,7 @@ export default function Dashboard() {
                                                   })
                                                 : '—'}
                                         </td>
-                                        <td>
+                                        <td data-label="Statut">
                                             <span
                                                 className={`form-check form-switch d-inline-flex ${
                                                     emp.actif ? '' : ''
@@ -680,7 +687,7 @@ export default function Dashboard() {
                                                 />
                                             </span>
                                         </td>
-                                        <td>
+                                        <td className="td-actions">
                                             <Link
                                                 to={`/admin/utilisateurs`}
                                                 className={

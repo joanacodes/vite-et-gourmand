@@ -225,7 +225,7 @@ export default function Statistiques() {
                     <p className="text-muted">Aucun client fidèle pour le moment.</p>
                 ) : (
                     <div className="table-responsive">
-                        <table className="s-table">
+                        <table className="s-table table-cartes">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -238,13 +238,13 @@ export default function Statistiques() {
                             <tbody>
                                 {clientsFideles.slice(0, 10).map((c, idx) => (
                                     <tr key={c.id}>
-                                        <td className="s-rang">
+                                        <td data-label="Rang" className="s-rang">
                                             {idx === 0 && '🥇'}
                                             {idx === 1 && '🥈'}
                                             {idx === 2 && '🥉'}
                                             {idx > 2 && <span className="text-muted">{idx + 1}</span>}
                                         </td>
-                                        <td>
+                                        <td data-label="Client" className="td-stack">
                                             <div className="s-client-cell">
                                                 <div className="s-client-avatar" aria-hidden="true">
                                                     {c.prenom?.[0]?.toUpperCase()}
@@ -255,11 +255,11 @@ export default function Statistiques() {
                                                 </strong>
                                             </div>
                                         </td>
-                                        <td className="text-muted">{c.email}</td>
-                                        <td>
+                                        <td data-label="Email" className="text-muted">{c.email}</td>
+                                        <td data-label="Commandes">
                                             <strong>{c.nombreCommandes}</strong>
                                         </td>
-                                        <td className="s-montant">
+                                        <td data-label="Total dépensé" className="s-montant">
                                             {Math.round(Number(c.totalDepense)).toLocaleString('fr-FR')} €
                                         </td>
                                     </tr>

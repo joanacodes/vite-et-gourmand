@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
 import { Plus, UserCog, Search, ShieldCheck, ShieldOff, Eye, EyeOff } from 'lucide-react'
 import { api } from '../../../services/api'
+import { useInfiniteList } from '../../../hooks/useInfiniteList'
 import './GestionUtilisateurs.css'
 
 interface UtilisateurListe {
@@ -92,6 +93,14 @@ export default function GestionUtilisateurs() {
             return true
         })
     }, [utilisateurs, recherche, filtreRole, filtreActif])
+
+    // Infinite scroll
+    const {
+        itemsVisibles: utilisateursAffiches,
+        sentinelleRef,
+        restant,
+        aPlus,
+    } = useInfiniteList(utilisateursFiltres)
 
     async function basculerActif(u: UtilisateurListe) {
         try {
@@ -252,7 +261,7 @@ export default function GestionUtilisateurs() {
             {/* Table */}
             <section className="gu-table-bloc">
                 <div className="table-responsive">
-                    <table className="gu-table">
+                    <table className="gu-table table-cartes">
                         <thead>
                             <tr>
                                 <th>UTILISATEUR</th>
@@ -264,16 +273,16 @@ export default function GestionUtilisateurs() {
                             </tr>
                         </thead>
                         <tbody>
-                            {utilisateursFiltres.length === 0 ? (
+                            {utilisateursAffiches.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="text-center text-muted py-4">
                                         Aucun utilisateur ne correspond aux filtres.
                                     </td>
                                 </tr>
                             ) : (
-                                utilisateursFiltres.map((u) => (
+                                utilisateursAffiches.map((u) => (
                                     <tr key={u.utilisateur_id} className={!u.actif ? 'gu-row-inactif' : ''}>
-                                        <td>
+                                        <td data-label="Utilisateur" className="td-stack">
                                             <div className="gu-utilisateur">
                                                 <div className="gu-avatar" aria-hidden="true">
                                                     {u.prenom?.[0]?.toUpperCase()}
@@ -284,8 +293,8 @@ export default function GestionUtilisateurs() {
                                                 </strong>
                                             </div>
                                         </td>
-                                        <td className="gu-email">{u.email}</td>
-                                        <td>
+                                        <td data-label="Email" className="gu-email">{u.email}</td>
+                                        <td data-label="Rôle">
                                             <span className={`gu-badge-role gu-badge-role--${u.role}`}>
                                                 {u.role === 'administrateur'
                                                     ? 'Administrateur'
@@ -294,21 +303,21 @@ export default function GestionUtilisateurs() {
                                                       : 'Client'}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td data-label="Date création">
                                             {new Date(u.date_creation).toLocaleDateString('fr-FR', {
                                                 day: '2-digit',
                                                 month: 'short',
                                                 year: 'numeric',
                                             })}
                                         </td>
-                                        <td>
+                                        <td data-label="Statut">
                                             {u.actif ? (
                                                 <span className="gu-statut gu-statut--actif">Actif</span>
                                             ) : (
                                                 <span className="gu-statut gu-statut--inactif">Désactivé</span>
                                             )}
                                         </td>
-                                        <td>
+                                        <td className="td-actions">
                                             {u.role !== 'administrateur' && (
                                                 <button
                                                     type="button"
@@ -347,8 +356,22 @@ export default function GestionUtilisateurs() {
                     </table>
                 </div>
                 <div className="gu-table-footer">
-                    <strong>{utilisateursFiltres.length}</strong> sur {utilisateurs.length} utilisateurs
+                    {aPlus ? (
+                        <>
+                            Affichage de <strong>{utilisateursAffiches.length}</strong> sur {utilisateurs.length} utilisateurs
+                            <span className="text-muted ms-2">({restant} de plus en scrollant…)</span>
+                        </>
+                    ) : (
+                        <>
+                            <strong>{utilisateursFiltres.length}</strong> utilisateurs
+                            {utilisateursFiltres.length !== utilisateurs.length && (
+                                <> (filtrés sur {utilisateurs.length})</>
+                            )}
+                        </>
+                    )}
                 </div>
+
+                {aPlus && <div ref={sentinelleRef} style={{ height: 1 }} aria-hidden="true" />}
             </section>
 
             {/* Modale creation employe */}

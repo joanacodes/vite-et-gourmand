@@ -19,6 +19,7 @@ import {
 import { api } from '../../services/api'
 import type { Commande, StatutCommande } from '../../types'
 import KpiCarte from '../../components/admin/KpiCarte'
+import { useInfiniteList } from '../../hooks/useInfiniteList'
 import './GestionCommandes.css'
 
 type ChampsTri = 'numero_commande' | 'date_prestation' | 'nombre_personnes' | 'prix' | 'statut'
@@ -40,8 +41,9 @@ export default function GestionCommandes({ racine }: Props) {
     const [filtrePeriode, setFiltrePeriode] = useState<string>('semaine')
 
     // Pagination
-    const [pageActuelle, setPageActuelle] = useState(1)
-    const [lignesParPage, setLignesParPage] = useState(10)
+    // (anciens etats de pagination retires : infinite scroll les remplace)
+    // const [pageActuelle, setPageActuelle] = useState(1)
+    // const [lignesParPage, setLignesParPage] = useState(10)
 
     // Tri
     const [champTri, setChampTri] = useState<ChampsTri>('date_prestation')
@@ -180,15 +182,16 @@ export default function GestionCommandes({ racine }: Props) {
         }
     }, [commandes])
 
-    // Pagination
-    const totalPages = Math.max(1, Math.ceil(commandesFiltrees.length / lignesParPage))
-    const debutPage = (pageActuelle - 1) * lignesParPage
-    const commandesAffichees = commandesFiltrees.slice(debutPage, debutPage + lignesParPage)
+    // Infinite scroll a la place de la pagination paginee
+    const {
+        itemsVisibles: commandesAffichees,
+        sentinelleRef,
+        restant,
+        aPlus,
+    } = useInfiniteList(commandesFiltrees)
 
-    // Reset pagination si on change un filtre
-    useEffect(() => {
-        setPageActuelle(1)
-    }, [recherche, filtreStatut, filtreClient, filtrePeriode, lignesParPage])
+    // Reset utile si filtres changent (le hook le fait deja, mais ca ne coute rien)
+    // (anciennement on remettait pageActuelle a 1)
 
     function changerTri(champ: ChampsTri) {
         if (champTri === champ) {
@@ -438,7 +441,7 @@ export default function GestionCommandes({ racine }: Props) {
             {/* ===== TABLE ===== */}
             <section className="gc-table-bloc">
                 <div className="table-responsive">
-                    <table className="gc-table">
+                    <table className="gc-table table-cartes">
                         <thead>
                             <tr>
                                 <th>
@@ -502,7 +505,7 @@ export default function GestionCommandes({ racine }: Props) {
                                                 aria-label={`Sélectionner ${cmd.numero_commande}`}
                                             />
                                         </td>
-                                        <td className="gc-table-numero">
+                                        <td data-label="N° commande" className="gc-table-numero">
                                             <Link
                                                 to={`${racine}/commandes/${cmd.numero_commande}`}
                                                 className="gc-table-lien"
@@ -510,7 +513,7 @@ export default function GestionCommandes({ racine }: Props) {
                                                 {cmd.numero_commande}
                                             </Link>
                                         </td>
-                                        <td>
+                                        <td data-label="Client" className="td-stack">
                                             <div className="gc-table-client">
                                                 <div className="gc-table-avatar" aria-hidden="true">
                                                     {cmd.client_prenom?.[0]?.toUpperCase()}
@@ -526,8 +529,8 @@ export default function GestionCommandes({ racine }: Props) {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{cmd.menu_titre || '—'}</td>
-                                        <td>
+                                        <td data-label="Menu">{cmd.menu_titre || '—'}</td>
+                                        <td data-label="Date prestation">
                                             <div className="gc-table-date">
                                                 {cmd.date_prestation
                                                     ? new Date(cmd.date_prestation).toLocaleDateString('fr-FR', {
@@ -541,18 +544,18 @@ export default function GestionCommandes({ racine }: Props) {
                                                 )}
                                             </div>
                                         </td>
-                                        <td>{cmd.nombre_personnes}</td>
-                                        <td className="fw-medium">
+                                        <td data-label="Personnes">{cmd.nombre_personnes}</td>
+                                        <td data-label="Montant" className="fw-medium">
                                             {(
                                                 Number(cmd.prix_menu || 0) +
                                                 Number(cmd.prix_livraison || 0)
                                             ).toFixed(0)}{' '}
                                             €
                                         </td>
-                                        <td>
+                                        <td data-label="Statut">
                                             <BadgeStatut statut={cmd.statut} />
                                         </td>
-                                        <td>
+                                        <td className="td-actions">
                                             <div className="d-flex gap-2">
                                                 <Link
                                                     to={`${racine}/commandes/${cmd.numero_commande}`}
@@ -581,67 +584,19 @@ export default function GestionCommandes({ racine }: Props) {
                     </table>
                 </div>
 
-                {/* Pagination */}
+                {/* Footer avec infinite scroll (remplace l'ancienne pagination) */}
                 <div className="gc-pagination">
-                    <div className="gc-pagination-lignes">
-                        <label htmlFor="gc-lignes-par-page" className="me-2">
-                            Lignes par page :
-                        </label>
-                        <select
-                            id="gc-lignes-par-page"
-                            value={lignesParPage}
-                            onChange={(e) => setLignesParPage(parseInt(e.target.value))}
-                            className="form-select form-select-sm"
-                            style={{ width: 'auto', display: 'inline-block' }}
-                        >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                        </select>
-                    </div>
                     <div className="gc-pagination-info">
                         {commandesFiltrees.length === 0
                             ? '0 résultat'
-                            : `${debutPage + 1}-${Math.min(debutPage + lignesParPage, commandesFiltrees.length)} sur ${commandesFiltrees.length}`}
-                    </div>
-                    <div className="gc-pagination-boutons">
-                        <button
-                            type="button"
-                            onClick={() => setPageActuelle((p) => Math.max(1, p - 1))}
-                            disabled={pageActuelle === 1}
-                            aria-label="Page précédente"
-                        >
-                            ←
-                        </button>
-                        {genererPages(pageActuelle, totalPages).map((p, i) =>
-                            p === '...' ? (
-                                <span key={`dots-${i}`} className="gc-pagination-dots">
-                                    …
-                                </span>
-                            ) : (
-                                <button
-                                    key={p}
-                                    type="button"
-                                    onClick={() => setPageActuelle(p as number)}
-                                    className={pageActuelle === p ? 'gc-pagination-actif' : ''}
-                                    aria-label={`Page ${p}`}
-                                    aria-current={pageActuelle === p ? 'page' : undefined}
-                                >
-                                    {p}
-                                </button>
-                            )
-                        )}
-                        <button
-                            type="button"
-                            onClick={() => setPageActuelle((p) => Math.min(totalPages, p + 1))}
-                            disabled={pageActuelle === totalPages}
-                            aria-label="Page suivante"
-                        >
-                            →
-                        </button>
+                            : aPlus
+                              ? `Affichage de ${commandesAffichees.length} sur ${commandesFiltrees.length} commandes — ${restant} de plus en scrollant…`
+                              : `${commandesFiltrees.length} commande${commandesFiltrees.length > 1 ? 's' : ''}`}
                     </div>
                 </div>
+
+                {/* Sentinelle pour l'infinite scroll */}
+                {aPlus && <div ref={sentinelleRef} style={{ height: 1 }} aria-hidden="true" />}
             </section>
 
             {/* Modale "fonctionnalite a venir" */}
@@ -719,16 +674,5 @@ function BadgeStatut({ statut }: { statut: string }) {
     return <span className={`gc-badge ${info.classe}`}>{info.label}</span>
 }
 
-// Genere la liste paginee compacte (1, 2, 3, ..., 16)
-function genererPages(actuelle: number, total: number): (number | '...')[] {
-    if (total <= 5) {
-        return Array.from({ length: total }, (_, i) => i + 1)
-    }
-    if (actuelle <= 3) {
-        return [1, 2, 3, '...', total]
-    }
-    if (actuelle >= total - 2) {
-        return [1, '...', total - 2, total - 1, total]
-    }
-    return [1, '...', actuelle, '...', total]
-}
+// Note : la fonction de pagination paginee a ete remplacee par
+// l'infinite scroll (hook useInfiniteList).

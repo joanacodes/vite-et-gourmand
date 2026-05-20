@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { Calendar, ChevronRight, ShoppingBag } from 'lucide-react'
 import { api } from '../../services/api'
 import type { Commande } from '../../types'
+import { useInfiniteList } from '../../hooks/useInfiniteList'
 import './MonComptePages.css'
 
 const LABELS_STATUT: Record<string, string> = {
@@ -62,6 +63,14 @@ export default function MesCommandes() {
         )
         return liste
     }, [commandes, filtreStatut])
+
+    // Infinite scroll
+    const {
+        itemsVisibles: commandesAffichees,
+        sentinelleRef,
+        restant,
+        aPlus,
+    } = useInfiniteList(commandesFiltrees)
 
     if (chargement) {
         return (
@@ -135,7 +144,7 @@ export default function MesCommandes() {
                 </div>
             ) : (
                 <div className="mc-commandes">
-                    {commandesFiltrees.map((c) => (
+                    {commandesAffichees.map((c) => (
                         <Link
                             to={`/mon-compte/commandes/${c.numero_commande}`}
                             key={c.numero_commande}
@@ -171,6 +180,14 @@ export default function MesCommandes() {
                             </div>
                         </Link>
                     ))}
+                    {aPlus && (
+                        <>
+                            <div className="text-center text-muted py-2">
+                                {restant} commandes de plus en scrollant…
+                            </div>
+                            <div ref={sentinelleRef} style={{ height: 1 }} aria-hidden="true" />
+                        </>
+                    )}
                 </div>
             )}
         </div>

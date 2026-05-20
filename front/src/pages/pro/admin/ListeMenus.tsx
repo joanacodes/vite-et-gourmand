@@ -17,6 +17,7 @@ import {
 import { api } from '../../../services/api'
 import type { Menu } from '../../../types'
 import KpiCarte from '../../../components/admin/KpiCarte'
+import { useInfiniteList } from '../../../hooks/useInfiniteList'
 import './ListeMenus.css'
 
 interface Theme {
@@ -106,6 +107,14 @@ export default function ListeMenus({ racine }: Props) {
             return true
         })
     }, [menus, recherche, filtreTheme, filtreStatut])
+
+    // Infinite scroll : on n'affiche que N premiers items
+    const {
+        itemsVisibles: menusAffiches,
+        sentinelleRef,
+        restant,
+        aPlus,
+    } = useInfiniteList(menusFiltres)
 
     async function confirmerSuppression() {
         if (!menuASupprimer) return
@@ -251,7 +260,7 @@ export default function ListeMenus({ racine }: Props) {
             {/* Table */}
             <section className="lm-table-bloc">
                 <div className="table-responsive">
-                    <table className="lm-table">
+                    <table className="lm-table table-cartes">
                         <thead>
                             <tr>
                                 <th><input type="checkbox" aria-label="Tout sélectionner" /></th>
@@ -266,14 +275,14 @@ export default function ListeMenus({ racine }: Props) {
                             </tr>
                         </thead>
                         <tbody>
-                            {menusFiltres.length === 0 ? (
+                            {menusAffiches.length === 0 ? (
                                 <tr>
                                     <td colSpan={9} className="text-center text-muted py-4">
                                         Aucun menu ne correspond aux filtres.
                                     </td>
                                 </tr>
                             ) : (
-                                menusFiltres.map((menu) => {
+                                menusAffiches.map((menu) => {
                                     const enRupture = menu.quantite_restante === 0
                                     const imageUrl = menu.image_principale?.url
 
@@ -289,7 +298,7 @@ export default function ListeMenus({ racine }: Props) {
                                                     aria-label={`Sélectionner ${menu.titre}`}
                                                 />
                                             </td>
-                                            <td>
+                                            <td data-label="Image">
                                                 <div className="lm-image-cell">
                                                     {imageUrl ? (
                                                         <img src={imageUrl} alt={menu.titre} />
@@ -300,7 +309,7 @@ export default function ListeMenus({ racine }: Props) {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td data-label="Menu" className="td-stack">
                                                 <div className="lm-nom">
                                                     <strong className="lm-nom-lien">
                                                         {menu.titre}
@@ -312,14 +321,14 @@ export default function ListeMenus({ racine }: Props) {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td data-label="Catégorie">
                                                 <span className="lm-badge-theme">{menu.theme}</span>
                                             </td>
-                                            <td className="fw-medium">
+                                            <td data-label="Prix/pers." className="fw-medium">
                                                 {Number(menu.prix_par_personne).toFixed(2)} €
                                             </td>
-                                            <td>{menu.nombre_personnes_minimum} pers.</td>
-                                            <td>
+                                            <td data-label="Min. pers.">{menu.nombre_personnes_minimum} pers.</td>
+                                            <td data-label="Stock">
                                                 {enRupture ? (
                                                     <div className="lm-stock-rupture">
                                                         <strong>0 unités</strong>
@@ -333,7 +342,7 @@ export default function ListeMenus({ racine }: Props) {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td onClick={(e) => e.stopPropagation()}>
+                                            <td data-label="Statut" onClick={(e) => e.stopPropagation()}>
                                                 <label className="form-switch lm-switch">
                                                     <input
                                                         type="checkbox"
@@ -344,7 +353,7 @@ export default function ListeMenus({ racine }: Props) {
                                                     />
                                                 </label>
                                             </td>
-                                            <td onClick={(e) => e.stopPropagation()}>
+                                            <td className="td-actions" onClick={(e) => e.stopPropagation()}>
                                                 <div className="d-flex gap-2">
                                                     <Link
                                                         to={`${racine}/menus/${menu.menu_id}`}
@@ -382,8 +391,25 @@ export default function ListeMenus({ racine }: Props) {
                 </div>
 
                 <div className="lm-table-footer">
-                    Affichage de <strong>{menusFiltres.length}</strong> sur {menus.length} menus
+                    {aPlus ? (
+                        <>
+                            Affichage de <strong>{menusAffiches.length}</strong> sur {menus.length} menus
+                            <span className="text-muted ms-2">
+                                ({restant} de plus en scrollant…)
+                            </span>
+                        </>
+                    ) : (
+                        <>
+                            <strong>{menusFiltres.length}</strong> menus
+                            {menusFiltres.length !== menus.length && (
+                                <> (filtrés sur {menus.length})</>
+                            )}
+                        </>
+                    )}
                 </div>
+
+                {/* Sentinelle pour l'infinite scroll */}
+                {aPlus && <div ref={sentinelleRef} style={{ height: 1 }} aria-hidden="true" />}
             </section>
 
             {/* Modale confirmation suppression */}

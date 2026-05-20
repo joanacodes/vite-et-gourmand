@@ -238,3 +238,69 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ===== Ligne cliquable + miniature + description ===== */
+.gp-row-clickable {
+    cursor: pointer;
+}
+
+.gp-titre-cell {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.gp-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    flex-shrink: 0;
+    display: block;
+    background-color: var(--color-creme-ivoire);
+}
+
+.gp-thumb--vide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: var(--color-gris-texte);
+}
+
+.gp-description-cell {
+    color: var(--color-gris-texte);
+    font-size: var(--text-xs);
+    margin-top: 2px;
+    max-width: 400px;
+    line-height: 1.4;
+}
+
+/* Apercu photo dans la modale */
+.gp-photo-apercu {
+    margin-top: var(--space-sm);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    max-width: 200px;
+    background-color: var(--color-creme-ivoire);
+}
+
+.gp-photo-apercu img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Sur mobile/tablette : forcer la taille de la miniature pour empecher
+   l'image de la prendre toute la largeur de la carte */
+@media (max-width: 991px) {
+    img.gp-thumb {
+        width: 64px !important;
+        height: 64px !important;
+        max-width: 64px !important;
+    }
+    .gp-thumb--vide {
+        width: 64px;
+        height: 64px;
+    }
+}

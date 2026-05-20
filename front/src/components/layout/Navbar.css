@@ -6,6 +6,8 @@
     background-color: var(--color-bordeaux);
     box-shadow: var(--shadow-sm);
     width: 100%;
+    position: relative;
+    z-index: 100;
 }
 
 /* Logo "Vite & Gourmand" en Instrument Serif italic */
@@ -23,7 +25,24 @@
     color: var(--color-blanc) !important;
 }
 
-/* Liens de la navbar */
+/* Liens desktop */
+.navbar-liens-desktop {
+    display: none;
+    gap: var(--space-md);
+}
+
+.navbar-droite-desktop {
+    display: none;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+@media (min-width: 992px) {
+    .navbar-liens-desktop { display: flex; }
+    .navbar-droite-desktop { display: flex; }
+}
+
+/* Liens de la navbar (desktop) */
 .navbar-lien {
     color: var(--color-blanc) !important;
     text-decoration: none;
@@ -39,7 +58,6 @@
     color: var(--color-blanc) !important;
 }
 
-/* Lien actif : trait sous le texte */
 .navbar-lien.active {
     font-weight: 500;
 }
@@ -52,6 +70,18 @@
     right: var(--space-sm);
     height: 2px;
     background-color: var(--color-blanc);
+}
+
+/* "Bonjour Prenom" (lien vers mon-compte) */
+.navbar-bonjour {
+    color: var(--color-blanc) !important;
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+}
+
+.navbar-bonjour:hover {
+    opacity: 0.85;
+    color: var(--color-blanc) !important;
 }
 
 /* Bouton "Mon compte" : outline blanc */
@@ -74,7 +104,7 @@
     color: var(--color-bordeaux);
 }
 
-/* Bouton "Mon espace" (raccourci vers espace pro pour employes/admins) */
+/* Bouton "Mon espace" (raccourci vers espace pro) */
 .navbar-bouton-espacepro {
     display: inline-flex;
     align-items: center;
@@ -95,7 +125,177 @@
     color: var(--color-blanc) !important;
 }
 
-/* Responsive : menu plus compact sur mobile */
+/* ============================================================
+   HAMBURGER (mobile + tablette)
+   ============================================================ */
+.navbar-hamburger {
+    background: transparent;
+    border: none;
+    color: var(--color-blanc);
+    padding: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-hamburger:hover {
+    opacity: 0.85;
+}
+
+@media (min-width: 992px) {
+    .navbar-hamburger { display: none; }
+}
+
+/* ============================================================
+   OVERLAY MENU PLEIN ECRAN
+   ============================================================ */
+.navbar-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--color-bordeaux);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    animation: navbar-overlay-fade 0.2s ease-out;
+}
+
+@keyframes navbar-overlay-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.navbar-overlay-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.navbar-fermer {
+    background: transparent;
+    border: none;
+    color: var(--color-blanc);
+    padding: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-overlay-contenu {
+    padding: var(--space-lg);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.navbar-overlay-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.navbar-overlay-titre {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 12px 4px;
+}
+
+/* Liens publics dans le menu */
+.navbar-overlay-lien {
+    color: var(--color-blanc);
+    text-decoration: none;
+    padding: 14px 12px;
+    font-size: 1.1rem;
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.navbar-overlay-lien:hover,
+.navbar-overlay-lien.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-blanc);
+}
+
+/* Liens espace pro/client dans le menu */
+.navbar-overlay-lien-pro {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--color-blanc);
+    text-decoration: none;
+    padding: 12px;
+    font-size: var(--text-base);
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.navbar-overlay-lien-pro:hover,
+.navbar-overlay-lien-pro.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--color-blanc);
+}
+
+.navbar-overlay-separateur {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.15);
+    margin: var(--space-sm) 0;
+}
+
+/* Bandeau utilisateur connecte */
+.navbar-overlay-user {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: var(--space-sm) 12px;
+}
+
+.navbar-overlay-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-full);
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--color-blanc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.navbar-overlay-user strong {
+    color: var(--color-blanc);
+    display: block;
+}
+
+.navbar-overlay-role {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: var(--text-xs);
+    margin-top: 2px;
+}
+
+.navbar-overlay-deconnexion {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--color-blanc);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--text-base);
+    transition: all var(--transition-fast);
+}
+
+.navbar-overlay-deconnexion:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
 @media (max-width: 768px) {
     .navbar-logo {
         font-size: var(--text-lg);

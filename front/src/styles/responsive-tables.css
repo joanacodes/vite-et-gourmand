@@ -1,0 +1,129 @@
+/* ============================================================
+   RESPONSIVE - TABLES VERS CARTES
+   ============================================================
+   Sur mobile (< 576px) : chaque <tr> devient une carte verticale
+   Sur tablette (576-991px) : cartes en grille 2 colonnes
+   Sur desktop (>= 992px) : table classique (comportement par defaut)
+
+   Comment utiliser : ajouter la classe `table-cartes` sur la table,
+   et un attribut `data-label="Nom du champ"` sur chaque <td>.
+   Le tableau garde son apparence desktop ; le bascule visuel se fait
+   automatiquement sur les ecrans plus petits.
+   ============================================================ */
+
+@media (max-width: 991px) {
+
+    /* On masque les en-tetes : chaque cellule affichera son label */
+    .table-cartes thead {
+        display: none;
+    }
+
+    .table-cartes,
+    .table-cartes tbody {
+        display: block;
+        width: 100%;
+    }
+
+    /* Container des cartes : grille 1 colonne mobile, 2 colonnes tablette */
+    .table-cartes tbody {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    /* Chaque ligne devient une carte */
+    .table-cartes tbody tr {
+        display: block;
+        background: var(--color-blanc);
+        border-radius: var(--radius-md);
+        padding: var(--space-md);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--color-gris-clair);
+    }
+
+    /* Annule les hover en mode table */
+    .table-cartes tbody tr:hover {
+        background: var(--color-blanc);
+    }
+
+    /* Chaque cellule : label en haut, valeur en bas */
+    .table-cartes tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--color-gris-clair);
+        text-align: right;
+        min-height: 36px;
+    }
+
+    .table-cartes tbody td:last-child {
+        border-bottom: none;
+    }
+
+    .table-cartes tbody td::before {
+        content: attr(data-label);
+        flex-shrink: 0;
+        text-align: left;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--color-gris-texte);
+    }
+
+    /* Si une cellule n'a pas de data-label, on retire la pseudo */
+    .table-cartes tbody td:not([data-label])::before {
+        display: none;
+    }
+
+    /* Cellules d'actions : pleine largeur, alignement a droite */
+    .table-cartes tbody td.td-actions {
+        justify-content: flex-end;
+    }
+
+    /* Si une cellule a la classe td-stack, on empile au lieu d'aligner horizontalement */
+    .table-cartes tbody td.td-stack {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .table-cartes tbody td.td-stack::before {
+        margin-bottom: 4px;
+    }
+
+    /* Protection : aucune image dans une carte ne doit prendre plus que sa taille intrinseque.
+       Sans cette regle, certaines miniatures (plats notamment) se stretchent. */
+    .table-cartes tbody td img {
+        max-width: 100%;
+    }
+}
+
+/* Tablette : cartes 2 colonnes */
+@media (min-width: 576px) and (max-width: 991px) {
+    .table-cartes tbody {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ============================================================
+   ALTERNATIVE : SCROLL HORIZONTAL POUR LES TABLES VRAIMENT
+   LARGES (avec beaucoup de colonnes, ou les stats)
+   ============================================================
+   Sur ces tables, on garde le format tableau mais on permet
+   le scroll horizontal. Utilise la classe `table-scroll-mobile`
+   sur le container .table-responsive parent.
+   ============================================================ */
+
+@media (max-width: 991px) {
+    .table-scroll-mobile {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-scroll-mobile table {
+        min-width: 700px;
+    }
+}

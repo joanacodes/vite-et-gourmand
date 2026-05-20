@@ -8,6 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 
 // Nos styles : charte (tokens) puis index (reset + base typo)
 import './styles/charte.css'
+import './styles/responsive-tables.css'
 import './index.css'
 
 import App from './App.tsx'

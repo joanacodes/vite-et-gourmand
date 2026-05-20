@@ -3,10 +3,11 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
-import { Plus, Pencil, Trash2, Search, Soup, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, Search, Soup, X, Image as ImageIcon } from 'lucide-react'
 import { api } from '../../services/api'
 import type { Plat } from '../../types'
 import KpiCarte from '../../components/admin/KpiCarte'
+import { useInfiniteList } from '../../hooks/useInfiniteList'
 import './GestionPlats.css'
 
 interface Allergene {
@@ -47,6 +48,8 @@ export default function GestionPlats({}: Props) {
     // Champs formulaire
     const [formTitre, setFormTitre] = useState('')
     const [formType, setFormType] = useState<Plat['type']>('entree')
+    const [formDescription, setFormDescription] = useState('')
+    const [formPhoto, setFormPhoto] = useState('')
     const [formAllergenes, setFormAllergenes] = useState<number[]>([])
     const [enregistrement, setEnregistrement] = useState(false)
 
@@ -112,10 +115,20 @@ export default function GestionPlats({}: Props) {
         })
     }, [plats, recherche, filtreType, filtreAllergene])
 
+    // Infinite scroll
+    const {
+        itemsVisibles: platsAffiches,
+        sentinelleRef,
+        restant,
+        aPlus,
+    } = useInfiniteList(platsFiltres)
+
     function ouvrirModaleCreation() {
         setPlatEnEdition(null)
         setFormTitre('')
         setFormType('entree')
+        setFormDescription('')
+        setFormPhoto('')
         setFormAllergenes([])
         setModaleOuverte(true)
     }
@@ -124,6 +137,8 @@ export default function GestionPlats({}: Props) {
         setPlatEnEdition(plat)
         setFormTitre(plat.titre)
         setFormType(plat.type)
+        setFormDescription(plat.description || '')
+        setFormPhoto(plat.photo || '')
         setFormAllergenes(plat.allergenes?.map((a) => a.allergene_id) || [])
         setModaleOuverte(true)
     }
@@ -143,6 +158,8 @@ export default function GestionPlats({}: Props) {
             const payload = {
                 titre: formTitre.trim(),
                 type: formType,
+                description: formDescription.trim() || null,
+                photo: formPhoto.trim() || null,
                 allergenes: formAllergenes,
             }
             if (platEnEdition) {
@@ -281,7 +298,7 @@ export default function GestionPlats({}: Props) {
             {/* Table */}
             <section className="gp-table-bloc">
                 <div className="table-responsive">
-                    <table className="gp-table">
+                    <table className="gp-table table-cartes">
                         <thead>
                             <tr>
                                 <th>NOM DU PLAT</th>
@@ -291,24 +308,50 @@ export default function GestionPlats({}: Props) {
                             </tr>
                         </thead>
                         <tbody>
-                            {platsFiltres.length === 0 ? (
+                            {platsAffiches.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="text-center text-muted py-4">
                                         Aucun plat ne correspond aux filtres.
                                     </td>
                                 </tr>
                             ) : (
-                                platsFiltres.map((p) => (
-                                    <tr key={p.plat_id}>
-                                        <td>
-                                            <strong>{p.titre}</strong>
+                                platsAffiches.map((p) => (
+                                    <tr
+                                        key={p.plat_id}
+                                        className="gp-row-clickable"
+                                        onClick={() => ouvrirModaleEdition(p)}
+                                    >
+                                        <td data-label="Plat" className="td-stack">
+                                            <div className="gp-titre-cell">
+                                                {p.photo ? (
+                                                    <img
+                                                        src={p.photo}
+                                                        alt=""
+                                                        className="gp-thumb"
+                                                    />
+                                                ) : (
+                                                    <div className="gp-thumb gp-thumb--vide" aria-hidden="true">
+                                                        🍽️
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <strong>{p.titre}</strong>
+                                                    {p.description && (
+                                                        <div className="gp-description-cell">
+                                                            {p.description.length > 80
+                                                                ? p.description.slice(0, 80) + '…'
+                                                                : p.description}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Type">
                                             <span className={`gp-badge gp-badge--${p.type}`}>
                                                 {TYPES_PLAT.find((t) => t.key === p.type)?.label || p.type}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td data-label="Allergènes" className="td-stack">
                                             {p.allergenes && p.allergenes.length > 0 ? (
                                                 <div className="gp-chips">
                                                     {p.allergenes.map((a) => (
@@ -321,7 +364,7 @@ export default function GestionPlats({}: Props) {
                                                 <span className="text-muted">—</span>
                                             )}
                                         </td>
-                                        <td>
+                                        <td className="td-actions" onClick={(e) => e.stopPropagation()}>
                                             <div className="d-flex gap-2">
                                                 <button
                                                     type="button"
@@ -350,8 +393,20 @@ export default function GestionPlats({}: Props) {
                     </table>
                 </div>
                 <div className="gp-table-footer">
-                    <strong>{platsFiltres.length}</strong> sur {plats.length} plats
+                    {aPlus ? (
+                        <>
+                            Affichage de <strong>{platsAffiches.length}</strong> sur {plats.length} plats
+                            <span className="text-muted ms-2">({restant} de plus en scrollant…)</span>
+                        </>
+                    ) : (
+                        <>
+                            <strong>{platsFiltres.length}</strong> plats
+                            {platsFiltres.length !== plats.length && <> (filtrés sur {plats.length})</>}
+                        </>
+                    )}
                 </div>
+
+                {aPlus && <div ref={sentinelleRef} style={{ height: 1 }} aria-hidden="true" />}
             </section>
 
             {/* Modale creation / edition */}
@@ -399,6 +454,44 @@ export default function GestionPlats({}: Props) {
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="plat-description" className="form-label fw-medium">
+                                    Description
+                                </label>
+                                <textarea
+                                    id="plat-description"
+                                    className="form-control"
+                                    rows={3}
+                                    value={formDescription}
+                                    onChange={(e) => setFormDescription(e.target.value)}
+                                    placeholder="Décrivez les ingrédients, la préparation, l'origine..."
+                                />
+                                <div className="form-text">
+                                    Visible par les clients qui consultent un menu contenant ce plat.
+                                </div>
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="plat-photo" className="form-label fw-medium">
+                                    <ImageIcon size={14} aria-hidden="true" className="me-1" />
+                                    URL de la photo
+                                </label>
+                                <input
+                                    id="plat-photo"
+                                    type="url"
+                                    className="form-control"
+                                    value={formPhoto}
+                                    onChange={(e) => setFormPhoto(e.target.value)}
+                                    placeholder="https://images.unsplash.com/..."
+                                />
+                                <div className="form-text">
+                                    L'upload de fichier sera disponible prochainement. Collez en attendant l'URL d'une image en ligne.
+                                </div>
+                                {formPhoto && (
+                                    <div className="gp-photo-apercu">
+                                        <img src={formPhoto} alt="Aperçu" />
+                                    </div>
+                                )}
                             </div>
                             <div className="mb-3">
                                 <label className="form-label fw-medium">Allergènes</label>
