@@ -8,7 +8,6 @@ import { Link, useParams } from 'react-router-dom'
 import {
     Mail,
     Phone,
-    FileText,
     Calendar,
     User,
     Truck,
@@ -86,8 +85,7 @@ export default function DetailCommande({ racine }: Props) {
     const [contactMessage, setContactMessage] = useState('')
     const [contactEnCours, setContactEnCours] = useState(false)
 
-    // Modale facture (placeholder)
-    const [factureOuvert, setFactureOuvert] = useState(false)
+    // (modale facture retiree : fonctionnalite reportee)
 
     // Note interne
     const [nouvelleNote, setNouvelleNote] = useState('')
@@ -312,14 +310,7 @@ export default function DetailCommande({ racine }: Props) {
                     <Phone size={16} className="me-2" />
                     Appeler client
                 </a>
-                <button
-                    type="button"
-                    onClick={() => setFactureOuvert(true)}
-                    className="btn btn-outline-primary btn-sm"
-                >
-                    <FileText size={16} className="me-2" />
-                    Télécharger facture
-                </button>
+                {/* Bouton "Télécharger facture" retiré : fonctionnalité PDF reportée à une version ultérieure */}
             </div>
 
             {/* Layout 2 colonnes */}
@@ -791,30 +782,6 @@ export default function DetailCommande({ racine }: Props) {
                 </div>
             )}
 
-            {/* ===== MODALE FACTURE (placeholder) ===== */}
-            {factureOuvert && (
-                <div
-                    className="dc-modale-overlay"
-                    onClick={() => setFactureOuvert(false)}
-                    role="dialog"
-                    aria-modal="true"
-                >
-                    <div className="dc-modale" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="titre-serif">Téléchargement de facture</h3>
-                        <p>
-                            La génération de facture PDF n'est pas encore disponible. Cette
-                            fonctionnalité sera ajoutée dans une prochaine itération.
-                        </p>
-                        <button
-                            type="button"
-                            onClick={() => setFactureOuvert(false)}
-                            className="btn btn-primary"
-                        >
-                            Compris
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

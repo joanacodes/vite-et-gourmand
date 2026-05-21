@@ -11,6 +11,7 @@ import Menus from './pages/Menus'
 import DetailMenu from './pages/DetailMenu'
 import Commande from './pages/Commande'
 import Contact from './pages/Contact'
+import MentionsLegales from './pages/MentionsLegales'
 import Connexion from './pages/auth/Connexion'
 import Inscription from './pages/auth/Inscription'
 import MotDePasseOublie from './pages/auth/MotDePasseOublie'
@@ -67,6 +68,7 @@ function App() {
                 <Route path="/menu/:id" element={<DetailMenu />} />
                 <Route path="/commande/:id" element={<Commande />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/mentions-legales" element={<MentionsLegales />} />
                 <Route path="/connexion" element={<Connexion />} />
                 <Route path="/inscription" element={<Inscription />} />
                 <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />

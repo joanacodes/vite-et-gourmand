@@ -67,17 +67,17 @@ export default function Footer() {
                         <h4 className="footer-section-titre">LIENS UTILES</h4>
                         <ul className="footer-liste">
                             <li>
-                                <Link to="/mentions-legales" className="footer-lien">
+                                <Link to="/mentions-legales#mentions" className="footer-lien">
                                     Mentions légales
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/cgv" className="footer-lien">
+                                <Link to="/mentions-legales#cgv" className="footer-lien">
                                     Conditions Générales de Vente
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/confidentialite" className="footer-lien">
+                                <Link to="/mentions-legales#confidentialite" className="footer-lien">
                                     Politique de confidentialité
                                 </Link>
                             </li>
