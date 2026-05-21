@@ -13,6 +13,8 @@ import dns from "dns";
 dns.setServers(["8.8.8.8", "1.1.1.1", "8.8.4.4"]);
 
 import express, { Request, Response, NextFunction } from "express";
+import path from "path";
+import fs from "fs";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
@@ -57,13 +59,46 @@ const app = express();
 // Definition du port (par defaut 3000 si rien n'est defini dans .env)
 const PORT = process.env.PORT || 3000;
 
+// IMPORTANT : Render (et la plupart des PaaS) placent un reverse proxy
+// HTTPS devant l'app. Sans `trust proxy`, Express ne sait pas que la
+// requete arrive en HTTPS, et le cookie `secure: true` n'est pas envoye
+// au navigateur ⇒ pas de session, pas de CSRF. On active la confiance
+// uniquement en production pour eviter les effets de bord en local.
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 // ============================================================
 // SECURITE - MIDDLEWARES PRIORITAIRES
 // ============================================================
 
 // Helmet : ajoute des headers HTTP de securite
 // Protege contre XSS, clickjacking, MIME sniffing, etc.
-app.use(helmet());
+// Helmet : ajoute des headers HTTP de securite
+// Protege contre XSS, clickjacking, MIME sniffing, etc.
+// CSP personnalise pour autoriser Google Fonts et les images uploadees.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        // 'unsafe-inline' pour les styles Bootstrap inline et le styling
+        // dynamique. Si tu veux durcir : passer a un nonce.
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+        // Les images peuvent venir du serveur lui-meme (/uploads) ou en data: (icones SVG)
+        imgSrc: ["'self'", "data:", "blob:"],
+        scriptSrc: ["'self'"],
+        // Connexions API : meme origine en prod, sinon front/back separes
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+    // Render fournit le HTTPS, on garde HSTS active en prod
+    crossOriginEmbedderPolicy: false,
+  }),
+);
 
 // Desactive l'header "X-Powered-By" qui revele Express
 app.disable("x-powered-by");
@@ -195,6 +230,44 @@ app.use("/api/contact", limiteurContact, routesContact);
 // Routes des horaires : /api/horaires
 // Lecture publique (page Contact/Accueil), modification admin
 app.use("/api/horaires", routesHoraires);
+
+// ============================================================
+// SERVIR LE FRONT EN PRODUCTION
+// ============================================================
+// En prod (Render), le back-end sert aussi le build statique du front
+// situe dans front/dist (genere par `npm run build` dans le dossier front).
+// Comme ca, front et back sont sur le meme domaine : pas de CORS,
+// pas de variable VITE_API_URL a configurer, les fetchs en /api/...
+// tombent naturellement sur Express.
+//
+// En dev local, on saute ce bloc : Vite tourne sur 5173 et redirige
+// /api vers 3000 via son proxy (cf vite.config.ts).
+// ============================================================
+
+if (process.env.NODE_ENV === "production") {
+  // Chemin absolu vers front/dist depuis back/dist/index.js (apres compilation)
+  const cheminBuildFront = path.join(__dirname, "..", "..", "front", "dist");
+
+  if (fs.existsSync(cheminBuildFront)) {
+    // Sert les fichiers statiques (HTML, JS, CSS, images...)
+    app.use(express.static(cheminBuildFront));
+
+    // SPA fallback : toute URL qui n'est pas /api/* ni /uploads/*
+    // doit retourner index.html (sinon F5 sur /menus donne du 404).
+    // Express 5 : on utilise un middleware sans pattern pour eviter
+    // le bug de path-to-regexp avec les wildcards.
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      if (req.method !== "GET") return next();
+      if (req.path.startsWith("/api")) return next();
+      if (req.path.startsWith("/uploads")) return next();
+      res.sendFile(path.join(cheminBuildFront, "index.html"));
+    });
+  } else {
+    console.warn(
+      "⚠️  NODE_ENV=production mais front/dist introuvable. Front non servi.",
+    );
+  }
+}
 
 // ============================================================
 // GESTION DES ERREURS CSRF

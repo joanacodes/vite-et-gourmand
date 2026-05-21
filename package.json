@@ -1,6 +1,18 @@
 {
-  "dependencies": {
-    "express-rate-limit": "^8.5.1",
-    "helmet": "^8.1.0"
+  "name": "vite-et-gourmand",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Application web traiteur Vite & Gourmand - Studi ECF",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "install:all": "cd back && npm install && cd ../front && npm install",
+    "build:front": "cd front && npm install && npm run build",
+    "build:back": "cd back && npm install && npm run build",
+    "build": "npm run build:back && npm run build:front",
+    "start": "cd back && npm run start",
+    "render-build": "npm run build:back && npm run build:front",
+    "render-start": "node back/dist/index.js"
   }
 }
