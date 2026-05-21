@@ -3,10 +3,11 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
-import { Plus, Pencil, Trash2, Search, Soup, X, Image as ImageIcon } from 'lucide-react'
+import { Plus, Pencil, Trash2, Search, Soup, Image as ImageIcon } from 'lucide-react'
 import { api } from '../../services/api'
 import type { Plat } from '../../types'
 import KpiCarte from '../../components/admin/KpiCarte'
+import UploadImage from '../../components/UploadImage'
 import { useInfiniteList } from '../../hooks/useInfiniteList'
 import './GestionPlats.css'
 
@@ -472,26 +473,16 @@ export default function GestionPlats({}: Props) {
                                 </div>
                             </div>
                             <div className="mb-3">
-                                <label htmlFor="plat-photo" className="form-label fw-medium">
+                                <label className="form-label fw-medium">
                                     <ImageIcon size={14} aria-hidden="true" className="me-1" />
-                                    URL de la photo
+                                    Photo du plat
                                 </label>
-                                <input
-                                    id="plat-photo"
-                                    type="url"
-                                    className="form-control"
-                                    value={formPhoto}
-                                    onChange={(e) => setFormPhoto(e.target.value)}
-                                    placeholder="https://images.unsplash.com/..."
+                                <UploadImage
+                                    categorie="plats"
+                                    urlActuelle={formPhoto}
+                                    onUploaded={(url) => setFormPhoto(url)}
+                                    onSupprimee={() => setFormPhoto('')}
                                 />
-                                <div className="form-text">
-                                    L'upload de fichier sera disponible prochainement. Collez en attendant l'URL d'une image en ligne.
-                                </div>
-                                {formPhoto && (
-                                    <div className="gp-photo-apercu">
-                                        <img src={formPhoto} alt="Aperçu" />
-                                    </div>
-                                )}
                             </div>
                             <div className="mb-3">
                                 <label className="form-label fw-medium">Allergènes</label>

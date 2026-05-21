@@ -28,6 +28,31 @@ const transporteur = nodemailer.createTransport({
 
 
 // ============================================================
+// ASSAINISSEMENT DES SUJETS EMAIL
+//
+// Securite "defense en profondeur" contre l'injection d'en-tetes
+// d'email (Email Header Injection). Bien que nodemailer filtre
+// deja les CRLF dans ses entetes depuis sa v1.4, on ajoute notre
+// propre couche de protection :
+//
+// - Retire tous les caracteres de retour a la ligne (\r, \n)
+//   qui pourraient permettre d'injecter un nouvel entete (Bcc:, etc.)
+// - Retire les autres caracteres de controle (categorie C0/C1)
+// - Limite la longueur a 200 caracteres (RFC 5322 conseille 78,
+//   on est genereux)
+// - Retire les espaces en debut/fin
+// ============================================================
+function assainirSujet(sujet: string): string {
+    if (!sujet) return "";
+    return sujet
+        // eslint-disable-next-line no-control-regex
+        .replace(/[\r\n\x00-\x1F\x7F]/g, " ")
+        .slice(0, 200)
+        .trim();
+}
+
+
+// ============================================================
 // VERIFIER UNE PREFERENCE D'EMAIL (RGPD)
 //
 // Avant d'envoyer un email a un utilisateur, on verifie qu'il a
@@ -241,7 +266,7 @@ export async function envoyerEmailStatutCommande(
     return transporteur.sendMail({
         from: '"Vite & Gourmand" <contact@vite-et-gourmand.fr>',
         to: email,
-        subject: `${titre} (${numeroCommande})`,
+        subject: assainirSujet(`${titre} (${numeroCommande})`),
         html: contenuHTML
     });
 }
@@ -316,7 +341,7 @@ export async function envoyerEmailContact(
         from: '"Site Vite & Gourmand" <contact@vite-et-gourmand.fr>',
         to: process.env.MAIL_CONTACT || "contact@vite-et-gourmand.fr",
         replyTo: email, // Pour que Julie/Jose puissent repondre directement au visiteur
-        subject: `[Contact site] ${sujet}`,
+        subject: assainirSujet(`[Contact site] ${sujet}`),
         html: contenuHTML
     });
 }
@@ -389,7 +414,7 @@ export async function envoyerEmailLibreClient(
     return transporteur.sendMail({
         from: '"Vite & Gourmand" <contact@vite-et-gourmand.fr>',
         to: emailClient,
-        subject: sujet,
+        subject: assainirSujet(sujet),
         html: contenuHTML
     });
 }

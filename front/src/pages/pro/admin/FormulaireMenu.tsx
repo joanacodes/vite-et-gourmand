@@ -8,9 +8,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { Save, X, Plus, Star, Trash2, Image as ImageIcon, Check } from 'lucide-react'
+import { Save, X, Plus, Star, Trash2, Check } from 'lucide-react'
 import { api } from '../../../services/api'
 import type { Menu, Plat } from '../../../types'
+import UploadImage from '../../../components/UploadImage'
 import './FormulaireMenu.css'
 
 interface Theme {
@@ -76,9 +77,8 @@ export default function FormulaireMenu({ racine, mode }: Props) {
     const [erreur, setErreur] = useState<string | null>(null)
 
     // Modale ajout image
-    const [modaleImageOuverte, setModaleImageOuverte] = useState(false)
-    const [nouvelleImageUrl, setNouvelleImageUrl] = useState('')
-    const [nouvelleImageLegende, setNouvelleImageLegende] = useState('')
+    // (anciens etats modale image retires : remplaces par le composant UploadImage
+    //  qui upload directement le fichier au lieu de demander une URL externe)
 
     // Modale creation rapide d'un plat
     const [modalePlat, setModalePlat] = useState<Plat['type'] | null>(null)
@@ -153,21 +153,18 @@ export default function FormulaireMenu({ racine, mode }: Props) {
         )
     }
 
-    function ajouterImage() {
-        if (!nouvelleImageUrl.trim()) return
+    function ajouterImage(url: string) {
+        if (!url.trim()) return
         setImages((prev) => [
             ...prev,
             {
-                url: nouvelleImageUrl.trim(),
-                legende: nouvelleImageLegende.trim(),
+                url: url.trim(),
+                legende: '',
                 // Premiere image = principale par defaut
                 est_principale: prev.length === 0,
                 nouvelle: true,
             },
         ])
-        setNouvelleImageUrl('')
-        setNouvelleImageLegende('')
-        setModaleImageOuverte(false)
     }
 
     function supprimerImage(index: number) {
@@ -614,17 +611,10 @@ export default function FormulaireMenu({ racine, mode }: Props) {
                     <section className="fm-carte">
                         <h2 className="titre-serif fm-carte-titre">Galerie d'images</h2>
 
-                        <button
-                            type="button"
-                            onClick={() => setModaleImageOuverte(true)}
-                            className="fm-zone-upload"
-                        >
-                            <div className="fm-zone-upload-icone">
-                                <ImageIcon size={32} />
-                            </div>
-                            <strong>Ajouter une image</strong>
-                            <p className="text-muted small">URL externe (upload à venir)</p>
-                        </button>
+                        <UploadImage
+                            categorie="menus"
+                            onUploaded={(url) => ajouterImage(url)}
+                        />
 
                         {images.length > 0 && (
                             <>
@@ -753,68 +743,6 @@ export default function FormulaireMenu({ racine, mode }: Props) {
                     </section>
                 </aside>
             </div>
-
-            {/* === MODALE AJOUT IMAGE === */}
-            {modaleImageOuverte && (
-                <div
-                    className="fm-modale-overlay"
-                    onClick={() => setModaleImageOuverte(false)}
-                    role="dialog"
-                    aria-modal="true"
-                >
-                    <div className="fm-modale" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="titre-serif">Ajouter une image</h3>
-                        <p className="text-muted small">
-                            L'upload de fichier sera disponible prochainement. En
-                            attendant, collez l'URL d'une image en ligne (Unsplash,
-                            Cloudinary, etc.).
-                        </p>
-                        <div className="mb-3">
-                            <label htmlFor="img-url" className="form-label fw-medium">
-                                URL de l'image *
-                            </label>
-                            <input
-                                id="img-url"
-                                type="url"
-                                className="form-control"
-                                value={nouvelleImageUrl}
-                                onChange={(e) => setNouvelleImageUrl(e.target.value)}
-                                placeholder="https://images.unsplash.com/..."
-                            />
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="img-legende" className="form-label fw-medium">
-                                Légende (optionnel)
-                            </label>
-                            <input
-                                id="img-legende"
-                                type="text"
-                                className="form-control"
-                                value={nouvelleImageLegende}
-                                onChange={(e) => setNouvelleImageLegende(e.target.value)}
-                                placeholder="Plat servi sur table"
-                            />
-                        </div>
-                        <div className="d-flex gap-2 justify-content-end">
-                            <button
-                                type="button"
-                                onClick={() => setModaleImageOuverte(false)}
-                                className="btn btn-outline-primary"
-                            >
-                                Annuler
-                            </button>
-                            <button
-                                type="button"
-                                onClick={ajouterImage}
-                                className="btn btn-primary"
-                                disabled={!nouvelleImageUrl.trim()}
-                            >
-                                Ajouter
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* === MODALE CREATION RAPIDE D'UN PLAT === */}
             {modalePlat && (

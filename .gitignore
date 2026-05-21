@@ -33,3 +33,14 @@ coverage/
 .cache/
 .parcel-cache/
 .eslintcache
+
+# Fichiers uploades par les utilisateurs (images de plats/menus).
+# On garde la structure des dossiers grace au .gitkeep dans chaque sous-dossier.
+back/uploads/*
+!back/uploads/.gitkeep
+!back/uploads/plats/
+back/uploads/plats/*
+!back/uploads/plats/.gitkeep
+!back/uploads/menus/
+back/uploads/menus/*
+!back/uploads/menus/.gitkeep
